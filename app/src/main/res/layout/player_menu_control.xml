@@ -25,16 +25,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:weightSum="7">
-    <ImageButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/music_note"
-        android:background="@android:color/transparent"
-        android:layout_gravity="start"
-        android:layout_weight="1"/>
+        android:weightSum="5">
 
-    <ImageButton
+        <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/shuffle"
@@ -68,12 +61,6 @@
         android:background="@android:color/transparent"
         android:layout_weight="1"/>
 
-    <ImageButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/album"
-        android:background="@android:color/transparent"
-        android:layout_weight="1"/>
     </LinearLayout>
 
     <Space
