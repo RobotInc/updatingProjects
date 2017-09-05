@@ -11,12 +11,14 @@
         android:layout_height="25dp"
         android:layout_weight="1"
         android:background="@android:color/transparent"
+        android:elevation="5dp"
         android:fontFamily="@font/arima_madurai_extrabold"
+        android:gravity="center"
         android:text="தமிழ்"
         android:textColor="@color/teal_800"
+        android:textColorHighlight="@color/amber_800"
         android:textSize="14sp"
-        android:textStyle="bold"
-        android:gravity="center"/>
+        android:textStyle="bold" />
 
     <Button
         android:id="@+id/button2"
@@ -24,11 +26,13 @@
         android:layout_height="25dp"
         android:layout_weight="1"
         android:background="@android:color/transparent"
+        android:elevation="5dp"
         android:fontFamily="@font/capriola"
+        android:gravity="center"
         android:text="English"
         android:textAllCaps="false"
         android:textColor="@color/teal_800"
-        android:textSize="14sp"
-        android:gravity="center"/>
+        android:textColorHighlight="@color/amber_800"
+        android:textSize="14sp" />
 
 </LinearLayout>
