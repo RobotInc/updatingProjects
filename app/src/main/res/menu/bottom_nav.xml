@@ -1,0 +1,15 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/songs"
+        android:icon="@drawable/music_note"
+        android:titleCondensed="songs"/>
+    <item
+        android:id="@+id/album"
+        android:icon="@drawable/album"
+        android:titleCondensed="album"/>
+
+    <item
+        android:id="@+id/fav"
+        android:icon="@drawable/heart"
+        android:titleCondensed="favourite"/>
+</menu>
