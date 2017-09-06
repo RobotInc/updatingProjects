@@ -9,6 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
+
         <SeekBar
             android:id="@+id/seekBar"
             style="@style/Widget.AppCompat.SeekBar.Discrete"
@@ -25,8 +26,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:weightSum="5">
+        android:weightSum="7">
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:id="@+id/menuleft"
 
+            android:src="@drawable/music_note"
+            android:layout_weight="1"/>
         <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -54,13 +62,23 @@
         android:src="@drawable/skip_next"
         android:background="@android:color/transparent"
         android:layout_weight="1"/>
-    <ImageButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/heart"
-        android:background="@android:color/transparent"
-        android:layout_weight="1"/>
 
+        <ImageButton
+            android:id="@+id/fav_pop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:src="@drawable/heart" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/menuright"
+            android:background="@null"
+           android:layout_weight="1"
+            android:src="@drawable/album"
+            />
     </LinearLayout>
 
     <Space

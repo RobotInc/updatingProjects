@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:ads="http://schemas.android.com/apk/res-auto">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:textAlignment="center"
+                android:padding="9dp"
+                android:lineSpacingExtra="2dp"
+                android:text=""
+                android:fontFamily="@font/capriola"
+                android:textSize="16sp"
+                android:textColor="@color/amber_900"
+                android:id="@+id/lyricsEnglish"
+                android:textIsSelectable="true"/>
+
+
+            <com.google.android.gms.ads.AdView
+                android:id="@+id/adView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                ads:adSize="SMART_BANNER"
+                ads:adUnitId="ca-app-pub-7987343674758455/2565150215">
+            </com.google.android.gms.ads.AdView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:textScaleX="1.2"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:textAlignment="center"
+                android:padding="9dp"
+                android:lineSpacingExtra="2dp"
+                android:text=""
+                android:textSize="16sp"
+                android:fontFamily="@font/capriola"
+                android:textColor="@color/amber_900"
+                android:id="@+id/lyricsEnglish2"
+                android:textIsSelectable="true"/>
+
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>
