@@ -3,21 +3,30 @@
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_weight="1"
+
+              android:layout_marginTop="3dp"
+              android:layout_marginBottom="3dp"
+
     android:id="@+id/item_view">
     <RelativeLayout
-        android:layout_width="65dp"
+        android:layout_width="40dp"
         android:id="@+id/favsongCover"
+        android:layout_gravity="center"
+        android:layout_marginLeft="5dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginEnd="10dp"
         >
-        <com.bss.arrahmanlyrics.utils.digitalText
+
+        <TextView
+            android:id="@+id/trackNo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#a000ffae"
-            android:textSize="20sp"
-            android:id="@+id/trackNo"
-            android:layout_centerInParent="true"/>
+            android:fontFamily="@font/digital"
+            android:layout_centerInParent="true"
+            android:layout_centerVertical="true"
+            android:textColor="#a0000000"
+            android:textSize="20sp"/>
     </RelativeLayout>
 
     <LinearLayout
@@ -27,10 +36,11 @@
         android:layout_marginStart="10dp"
         android:id="@+id/albumsongdetails"
         android:layout_weight="1"
+        android:background="@drawable/white_grey_border_bottom"
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/favSongtitle"
+            android:id="@+id/Songtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"
@@ -38,20 +48,21 @@
             android:fontFamily="@font/capriola"
             android:text="SONG TITLE"
             android:textColor="@color/amber_900"
-            android:textSize="15sp"/>
+            android:textSize="14sp"/>
 
         <TextView
-            android:id="@+id/favSonglyricist"
+            android:id="@+id/Songlyricist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:alpha="0.8"
             android:ellipsize="end"
             android:fontFamily="@font/capriola"
             android:maxLines="1"
-            android:paddingTop="4dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="3dp"
             android:text="Song Lyricist"
             android:textColor="@color/teal_800"
-            android:textSize="14sp"
+            android:textSize="13sp"
             android:textStyle="italic" />
 
     </LinearLayout>

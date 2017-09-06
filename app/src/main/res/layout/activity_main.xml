@@ -24,14 +24,14 @@
        <RelativeLayout
            android:layout_width="match_parent"
            android:layout_height="match_parent"
-           android:layout_marginTop="110dp"
-           android:layout_marginEnd="10dp"
-           android:layout_marginStart="10dp"
+           android:layout_marginTop="101dp"
+           android:layout_marginEnd="2dp"
+           android:layout_marginStart="2dp"
            >
          <android.support.v7.widget.RecyclerView
              android:layout_width="match_parent"
              android:layout_height="match_parent"
-             android:id="@+id/rv">
+             android:id="@+id/rv1">
 
          </android.support.v7.widget.RecyclerView>
        </RelativeLayout>
@@ -49,13 +49,15 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="110dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginStart="10dp"
+            android:layout_marginTop="100dp"
+            android:layout_marginEnd="2dp"
+            android:layout_marginStart="2dp"
             >
             <android.support.v7.widget.RecyclerView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:clickable="true"
+                android:background="?attr/selectableItemBackground"
                 android:id="@+id/rv2">
 
             </android.support.v7.widget.RecyclerView>
