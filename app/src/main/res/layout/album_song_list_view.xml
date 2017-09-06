@@ -22,7 +22,7 @@
             android:id="@+id/trackNo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/digital"
+            android:fontFamily="@font/capriola"
             android:layout_centerInParent="true"
             android:layout_centerVertical="true"
             android:textColor="#a0000000"
