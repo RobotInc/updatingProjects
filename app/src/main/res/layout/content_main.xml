@@ -7,13 +7,45 @@
     android:layout_height="match_parent"
     tools:context="com.bss.arrahmanlyrics.MainActivity">
     <include
-        android:id="@+id/media_actions"
+        android:id="@+id/media_tabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         layout="@layout/language_select"
         android:layout_alignParentTop="true"/>
 
+<com.bss.arrahmanlyrics.utils.CustomViewPager
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="4dp"
+    android:layout_marginStart="4dp"
+    android:layout_marginEnd="4dp"
 
+    android:layout_marginBottom="20dp"
+    android:id="@+id/vg"
+    android:layout_above="@id/media_actions"
+    android:layout_below="@+id/media_tabs">
+
+</com.bss.arrahmanlyrics.utils.CustomViewPager>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/media_actions"
+        android:layout_marginStart="5dp"
+        android:id="@+id/currentTime"
+        android:text="00:00"
+        android:fontFamily="@font/capriola"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="2dp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/media_actions"
+        android:layout_marginEnd="5dp"
+        android:id="@+id/totalTime"
+        android:text="00:00"
+        android:fontFamily="@font/capriola"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="2dp"/>
     <include
         android:id="@+id/media_actions"
         android:layout_width="match_parent"

@@ -1,10 +1,12 @@
 package com.bss.arrahmanlyrics.viewHolders;
 
 import android.view.View;
+import android.view.ViewParent;
 import android.widget.TextView;
 
 import com.bss.arrahmanlyrics.R;
 import com.thoughtbot.expandablerecyclerview.viewholders.ChildViewHolder;
+import com.thoughtbot.expandablecheckrecyclerview.viewholders.CheckableChildViewHolder;
 
 public class albumSongListViewHolder extends ChildViewHolder {
 
@@ -19,6 +21,7 @@ public class albumSongListViewHolder extends ChildViewHolder {
 
 
   }
+
 
 
 }

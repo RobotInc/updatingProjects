@@ -1,14 +1,11 @@
 package com.bss.arrahmanlyrics.adapter;
 
 import android.content.Context;
-import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bss.arrahmanlyrics.models.songModel;
@@ -17,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.bss.arrahmanlyrics.R;
-import com.bss.arrahmanlyrics.utils.FirstLetterUpperCase;
+import com.bss.arrahmanlyrics.utils.Helper;
 import com.bumptech.glide.Glide;
 
 /**
@@ -54,12 +51,12 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder>{
 		songModel actualsong = songlist.get(position);
 
 
-		holder.name.setText(FirstLetterUpperCase.convert(actualsong.getSongTitle()));
+		holder.name.setText(Helper.FirstLetterCaps(actualsong.getSongTitle()));
 		//holder.name.setText(actualsong.getSongTitle());
 		Glide.with(mContext).load(actualsong.getImages()).into(holder.imageView);
 
-		holder.lyricist.setText(FirstLetterUpperCase.convert("Lyricist: " + actualsong.getLyricistName()));
-		holder.movietitle.setText(FirstLetterUpperCase.convert("Movie: " + actualsong.getMovietitle()));
+		holder.lyricist.setText(Helper.FirstLetterCaps("Lyricist: " + actualsong.getLyricistName()));
+		holder.movietitle.setText(Helper.FirstLetterCaps("Movie: " + actualsong.getMovietitle()));
 
 	}
 
@@ -89,12 +86,18 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder>{
 
 
 
-
 		public void setFilter(List<songModel> songlists) {
 			songlist = new ArrayList<>();
 			songlist.addAll(songlists);
 			notifyDataSetChanged();
 		}
 
+
+
 	}
+
+	public songModel getItem(int position){
+		return songlist.get(position);
+	}
+
 }

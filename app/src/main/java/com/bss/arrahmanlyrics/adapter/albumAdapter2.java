@@ -12,7 +12,7 @@ import android.widget.TextView;
 import com.bss.arrahmanlyrics.R;
 
 import com.bss.arrahmanlyrics.models.albumModel;
-import com.bss.arrahmanlyrics.utils.FirstLetterUpperCase;
+import com.bss.arrahmanlyrics.utils.Helper;
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ public class albumAdapter2 extends RecyclerView.Adapter<albumAdapter2.MyViewHold
 
 //        final Typeface font = Typeface.createFromAsset(Context.getAssets(), "Timber.ttf");
       //  holder.title.setTypeface(font);
-        holder.title.setText(FirstLetterUpperCase.convert(album.getMovietitle()));
+        holder.title.setText(Helper.FirstLetterCaps(album.getMovietitle()));
         holder.count.setText(album.getNumOfSongs() + " songs");
         Glide.with(Context).load(album.getImageString()).into(holder.thumbnail);
 

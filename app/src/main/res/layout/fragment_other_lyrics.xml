@@ -2,8 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    xmlns:ads="http://schemas.android.com/apk/res-auto">
+    android:background="@color/white"    xmlns:ads="http://schemas.android.com/apk/res-auto">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -19,7 +18,7 @@
         android:textAlignment="center"
         android:padding="9dp"
         android:lineSpacingExtra="2dp"
-        android:text=""
+        android:text="தமிழ் பாடல் வரிகள்"
         android:fontFamily="@font/arima_madurai_extrabold"
         android:textSize="16sp"
         android:textColor="@color/amber_900"

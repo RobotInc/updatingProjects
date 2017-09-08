@@ -2,7 +2,8 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:ads="http://schemas.android.com/apk/res-auto">
+    android:background="@color/white"
+             xmlns:ads="http://schemas.android.com/apk/res-auto">
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -18,7 +19,7 @@
                 android:textAlignment="center"
                 android:padding="9dp"
                 android:lineSpacingExtra="2dp"
-                android:text=""
+                android:text="English Lyrics"
                 android:fontFamily="@font/capriola"
                 android:textSize="16sp"
                 android:textColor="@color/amber_900"

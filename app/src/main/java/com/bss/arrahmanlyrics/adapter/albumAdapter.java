@@ -6,10 +6,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.bss.arrahmanlyrics.R;
-import com.bss.arrahmanlyrics.models.Tracks;
 import com.bss.arrahmanlyrics.models.albumModel;
 import com.bss.arrahmanlyrics.models.albumsongs;
-import com.bss.arrahmanlyrics.utils.FirstLetterUpperCase;
+import com.bss.arrahmanlyrics.utils.Helper;
 import com.bss.arrahmanlyrics.viewHolders.albumSongListViewHolder;
 import com.bss.arrahmanlyrics.viewHolders.albumViewHolder;
 import com.bumptech.glide.Glide;
@@ -46,8 +45,8 @@ public class albumAdapter extends ExpandableRecyclerViewAdapter<albumViewHolder,
       int childIndex) {
     final albumsongs songs = (albumsongs) group.getItems().get(childIndex);
           holder.trackNo.setText(songs.getTrackNo());
-          holder.lyricist.setText(FirstLetterUpperCase.convert(songs.getLyricistNames()));
-          holder.songtitle.setText(FirstLetterUpperCase.convert(songs.getSongName()));
+          holder.lyricist.setText(Helper.FirstLetterCaps(songs.getLyricistNames()));
+          holder.songtitle.setText(Helper.FirstLetterCaps(songs.getSongName()));
 
       }
 
@@ -58,7 +57,7 @@ public class albumAdapter extends ExpandableRecyclerViewAdapter<albumViewHolder,
 
 //        final Typeface font = Typeface.createFromAsset(Context.getAssets(), "Timber.ttf");
     //  holder.title.setTypeface(font);
-    holder.title.setText(FirstLetterUpperCase.convert(album.getMovietitle()));
+    holder.title.setText(Helper.FirstLetterCaps(album.getMovietitle()));
     holder.count.setText(album.getNumOfSongs() + " songs");
     Glide.with(context).load(album.getImageString()).into(holder.thumbnail);
   }

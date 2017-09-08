@@ -12,16 +12,13 @@
 
         <SeekBar
             android:id="@+id/seekBar"
-            style="@style/Widget.AppCompat.SeekBar.Discrete"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:max="15"
-            android:progress="3" />
+            android:layout_weight="1"/>
     </LinearLayout>
     <Space
         android:layout_width="match_parent"
-        android:layout_height="15dp" />
+        android:layout_height="10dp" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -39,6 +36,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/shuffle"
+        android:id="@+id/shuffle"
         android:background="@android:color/transparent"
         android:layout_weight="1"/>
 
@@ -46,6 +44,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/skip_previous"
+        android:id="@+id/previous"
         android:background="@android:color/transparent"
         android:layout_weight="1"/>
 
@@ -53,6 +52,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/play"
+        android:id="@+id/playpause"
         android:background="@android:color/transparent"
         android:layout_weight="1"/>
 
@@ -60,6 +60,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/skip_next"
+        android:id="@+id/next"
         android:background="@android:color/transparent"
         android:layout_weight="1"/>
 
@@ -80,8 +81,34 @@
             android:src="@drawable/album"
             />
     </LinearLayout>
-
-    <Space
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="15dp" />
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:text="Movie Title"
+            android:textColor="@color/white"
+            android:layout_weight="1"
+            android:layout_marginTop="5dp"
+            android:fontFamily="@font/capriola"
+            android:textSize="14sp"
+            android:id="@+id/moviename"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:gravity="right"
+            android:textColor="@color/white"
+
+            android:layout_weight="1"
+            android:text="Song Title"
+            android:layout_marginTop="5dp"
+            android:fontFamily="@font/capriola"
+            android:textSize="14sp"
+            android:id="@+id/songname"/>
+    </LinearLayout>
+
 </LinearLayout>
