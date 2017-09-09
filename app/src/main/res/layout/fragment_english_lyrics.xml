@@ -11,24 +11,32 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
-
+            <com.google.android.gms.ads.AdView
+                android:id="@+id/english_top"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                ads:adSize="SMART_BANNER"
+                ads:adUnitId="ca-app-pub-7987343674758455/2947028245">
+            </com.google.android.gms.ads.AdView>
             <TextView
+                android:id="@+id/lyricsEnglish"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:textAlignment="center"
-                android:padding="9dp"
-                android:lineSpacingExtra="2dp"
-                android:text="English Lyrics"
                 android:fontFamily="@font/capriola"
-                android:textSize="16sp"
-                android:textColor="@color/amber_900"
-                android:id="@+id/lyricsEnglish"
-                android:textIsSelectable="true"/>
+                android:lineSpacingExtra="2dp"
+                android:padding="9dp"
+                android:text="English Lyrics"
+                android:textAlignment="center"
+                android:textColor="@color/teal_900"
+                android:textIsSelectable="true"
+                android:textSize="16sp" />
 
 
             <com.google.android.gms.ads.AdView
-                android:id="@+id/adView"
+                android:id="@+id/eng_middle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
@@ -38,19 +46,19 @@
             </com.google.android.gms.ads.AdView>
 
             <TextView
+                android:id="@+id/lyricsEnglish2"
+
                 android:layout_width="wrap_content"
-                android:textScaleX="1.2"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:textAlignment="center"
-                android:padding="9dp"
-                android:lineSpacingExtra="2dp"
-                android:text=""
-                android:textSize="16sp"
                 android:fontFamily="@font/capriola"
-                android:textColor="@color/amber_900"
-                android:id="@+id/lyricsEnglish2"
-                android:textIsSelectable="true"/>
+                android:lineSpacingExtra="2dp"
+                android:padding="9dp"
+                android:text=""
+                android:textAlignment="center"
+                android:textColor="@color/teal_900"
+                android:textIsSelectable="true"
+                android:textSize="16sp" />
 
         </LinearLayout>
     </ScrollView>

@@ -2,8 +2,7 @@
 <resources>
     <array name="preloaded_fonts" translatable="false">
 
-        <item>@font/arima_madurai_extrabold</item>
-
+        <item>@font/baloo_thambi</item>
         <item>@font/capriola</item>
     </array>
 </resources>
