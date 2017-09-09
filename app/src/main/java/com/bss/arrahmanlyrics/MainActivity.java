@@ -12,12 +12,12 @@ import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PersistableBundle;
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -27,6 +27,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RadioGroup;
@@ -65,7 +66,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.thoughtbot.expandablerecyclerview.listeners.OnGroupClickListener;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 	EnglishFragment englishFragment;
 	TamilFragment tamilFragment;
 	private Handler mHandler = new Handler();
-
+	HashMap<String,Bitmap> albumcovers;
 
 	public static final String Broadcast_PLAY_NEW_AUDIO = "com.bss.arrahmanlyrics.activites.PlayNewAudio";
 	public static final String Broadcast_NEW_ALBUM = "com.bss.arrahmanlyrics.activites.PlayNewAlbum";
@@ -286,8 +286,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 	private void initUI() {
 		dialog = new ProgressDialog(this);
+
 		dialog.setMessage("Loading Database");
+
+
 		dialog.show();
+
 		mHandler.post(runnable);
 		playpause = (ImageButton) findViewById(R.id.playpause);
 		previous = (ImageButton) findViewById(R.id.previous);
@@ -318,6 +322,27 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 						viewPager.setCurrentItem(1);
 						break;
 				}
+			}
+		});
+		viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+			@Override
+			public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+
+			}
+
+			@Override
+			public void onPageSelected(int position) {
+				if(position == 0){
+					segmentedGroup.check(R.id.tamil);
+				}else if(position == 1){
+					segmentedGroup.check(R.id.english);
+				}
+			}
+
+			@Override
+			public void onPageScrollStateChanged(int state) {
+
 			}
 		});
 
@@ -386,7 +411,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			@Override
 			public void onDataChange(DataSnapshot dataSnapshot) {
 				values = (HashMap<String, Object>) dataSnapshot.getValue();
-
+				setImagesList();
 				setUpAlbumList();
 				setUpSongList();
 				dialog.hide();
@@ -411,7 +436,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		StorageUtil storageUtil = new StorageUtil(getApplicationContext());
 		storageUtil.clearCachedAudioPlaylist();
 		songList = new ArrayList<>();
-		songadapter = new SongAdapter(MainActivity.this, songList);
+		songadapter = new SongAdapter(MainActivity.this, songList,MainActivity.this);
 
 		rv1 = (RecyclerView) findViewById(R.id.rv1);
 		rv1.setAdapter(songadapter);
@@ -458,11 +483,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		SortedSet<String> trackNos = new TreeSet<>();
 		for (String albums : values.keySet()) {
 			HashMap<String, Object> songs = (HashMap<String, Object>) values.get(albums);
-			byte[] image = getImage(String.valueOf(songs.get("IMAGE")));
+
 			for (String song : songs.keySet()) {
 				if (!song.equals("IMAGE")) {
 					HashMap<String, Object> oneSong = (HashMap<String, Object>) songs.get(song);
-					songModel newSong = new songModel(albums, song, oneSong.get("Lyricist").toString(), image, String.valueOf(oneSong.get("Download")));
+					songModel newSong = new songModel(albums, song, oneSong.get("Lyricist").toString(), String.valueOf(oneSong.get("Download")));
 					list.add(newSong);
 					trackNos.add(song);
 				}
@@ -499,8 +524,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 		SortedSet<String> trackNos = new TreeSet<>();
 		for (String album : values.keySet()) {
-			list.add(new albumModel(album, ((HashMap<String, Object>) values.get(album)).size() - 1,
-					getImage(String.valueOf(((HashMap<String, Object>) values.get(album)).get("IMAGE"))), getBitmap(String.valueOf(((HashMap<String, Object>) values.get(album)).get("IMAGE")))));
+			list.add(new albumModel(album, ((HashMap<String, Object>) values.get(album)).size() - 1));
 			trackNos.add(album);
 		}
 		trackList = new ArrayList<>();
@@ -524,7 +548,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			}
 		}
 
-		albumadapter = new albumAdapter(trackList, MainActivity.this, albumList);
+		albumadapter = new albumAdapter(trackList, MainActivity.this, albumList,MainActivity.this);
 		rv2 = (RecyclerView) findViewById(R.id.rv2);
 		rv2.setAdapter(albumadapter);
 		RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
@@ -556,6 +580,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		}
 		byte[] decodedString = Base64.decode(imageString, Base64.DEFAULT);
 		Bitmap bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+		//Bitmap resized = Bitmap.createScaledBitmap(bitmap, 65, 65, false);
 		return bitmap;
 	}
 
@@ -802,5 +827,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		} else if (drawer.isDrawerOpen(GravityCompat.END)) {
 			drawer.closeDrawer(GravityCompat.END);
 		}
+	}
+
+	public void setImagesList(){
+
+		albumcovers = new HashMap<>();
+		for(String movies : values.keySet()){
+			HashMap<String,Object> movie = (HashMap<String, Object>) values.get(movies);
+			albumcovers.put(movies,getBitmap(String.valueOf(movie.get("IMAGE"))));
+
+		}
+
+	}
+
+	public Bitmap getImageBitmap(String movie){
+		return albumcovers.get(movie);
 	}
 }

@@ -11,14 +11,14 @@ public class songModel{
 	String Movietitle;
 	String songTitle;
 	String lyricistName;
-	byte[] images;
+	//byte[] images;
 	String ulr;
 
-	public songModel(String movietitle, String songTitle, String lyricistName, byte[] images, String ulr) {
+	public songModel(String movietitle, String songTitle, String lyricistName, String ulr) {
 		Movietitle = movietitle;
 		this.songTitle = songTitle;
 		this.lyricistName = lyricistName;
-		this.images = images;
+		//this.images = images;
 		this.ulr = ulr;
 	}
 
@@ -57,13 +57,13 @@ public class songModel{
 		this.lyricistName = lyricistName;
 	}
 
-	public byte[] getImages() {
+	/*public byte[] getImages() {
 		return images;
 	}
 
 	public void setImages(byte[] images) {
 		this.images = images;
-	}
+	}*/
 
 
 }

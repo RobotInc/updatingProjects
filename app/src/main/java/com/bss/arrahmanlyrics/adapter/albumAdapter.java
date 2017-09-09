@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bss.arrahmanlyrics.MainActivity;
 import com.bss.arrahmanlyrics.R;
 import com.bss.arrahmanlyrics.models.albumModel;
 import com.bss.arrahmanlyrics.models.albumsongs;
@@ -20,10 +21,12 @@ import java.util.List;
 public class albumAdapter extends ExpandableRecyclerViewAdapter<albumViewHolder, albumSongListViewHolder> {
   List<albumModel> albums;
   Context context;
-  public albumAdapter(List<? extends ExpandableGroup> groups,Context context,List<albumModel> albums) {
+  MainActivity activity;
+  public albumAdapter(List<? extends ExpandableGroup> groups,Context context,List<albumModel> albums,MainActivity activity) {
     super(groups);
     this.albums = albums;
     this.context = context;
+    this.activity = activity;
   }
 
   @Override
@@ -59,6 +62,7 @@ public class albumAdapter extends ExpandableRecyclerViewAdapter<albumViewHolder,
     //  holder.title.setTypeface(font);
     holder.title.setText(Helper.FirstLetterCaps(album.getMovietitle()));
     holder.count.setText(album.getNumOfSongs() + " songs");
-    Glide.with(context).load(album.getImageString()).into(holder.thumbnail);
+   //Glide.with(context).load(album.getImageString()).into(holder.thumbnail);
+    holder.thumbnail.setImageBitmap(activity.getImageBitmap(album.getMovietitle()));
   }
 }

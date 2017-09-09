@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bss.arrahmanlyrics.MainActivity;
 import com.bss.arrahmanlyrics.models.songModel;
 
 import java.util.ArrayList;
@@ -25,12 +26,12 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder>{
 
 	private Context mContext;
 	private List<songModel> songlist;
+	MainActivity activity;
 
-
-	public SongAdapter(Context context, List<songModel> songlist) {
+	public SongAdapter(Context context, List<songModel> songlist,MainActivity activity) {
 		this.mContext = context;
 		this.songlist = songlist;
-
+		this.activity = activity;
 		//QuickAction.setDefaultColor(ResourcesCompat.getColor(s.getResources(), R.color.white, null));
 		//QuickAction.setDefaultTextColor(Color.BLACK);
 
@@ -53,8 +54,8 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder>{
 
 		holder.name.setText(Helper.FirstLetterCaps(actualsong.getSongTitle()));
 		//holder.name.setText(actualsong.getSongTitle());
-		Glide.with(mContext).load(actualsong.getImages()).into(holder.imageView);
-
+//		Glide.with(mContext).load(actualsong.getImages()).into(holder.imageView);
+		holder.imageView.setImageBitmap(activity.getImageBitmap(actualsong.getMovietitle()));
 		holder.lyricist.setText(Helper.FirstLetterCaps("Lyricist: " + actualsong.getLyricistName()));
 		holder.movietitle.setText(Helper.FirstLetterCaps("Movie: " + actualsong.getMovietitle()));
 

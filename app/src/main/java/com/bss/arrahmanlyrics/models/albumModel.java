@@ -10,25 +10,22 @@ import android.os.Parcel;
 public class albumModel {
 	String Movietitle;
 	int numOfSongs;
-	byte[] imageString;
-	private Bitmap image;
+	//byte[] imageString;
+	//private Bitmap image;
 
-	public Bitmap getImage() {
+	/*/public Bitmap getImage() {
 		return image;
-	}
+}
 
 	public void setImage(Bitmap image) {
 		this.image = image;
-	}
+	}*/
 
-	public albumModel(String movietitle, int numOfSongs, byte[] imageString, Bitmap image) {
+	public albumModel(String movietitle, int numOfSongs) {
 		this.Movietitle = movietitle;
 
 		this.numOfSongs = numOfSongs;
 
-		this.imageString = imageString;
-
-		this.image = image;
 
 	}
 
@@ -46,13 +43,13 @@ public class albumModel {
 
 
 
-	public byte[] getImageString() {
+	/*public byte[] getImageString() {
 		return imageString;
 	}
 
 	public void setImageString(byte[] imageString) {
 		this.imageString = imageString;
-	}
+	}*/
 
 
 	public int getNumOfSongs() {
