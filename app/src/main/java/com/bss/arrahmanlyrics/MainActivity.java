@@ -98,7 +98,7 @@ import java.util.TreeSet;
 
 import info.hoang8f.android.segmented.SegmentedGroup;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener, MusicService.mainActivityCallback {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener, MusicService.mainActivityCallback, SearchView.OnQueryTextListener {
 
 	private static final String TAG = "MainActivity";
 	//firebase
@@ -121,6 +121,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 	List<songModel> songList;
 	List<albumsongs> albumsongsList;
 	List<songModel> favoriteSongList;
+	List<songModel> filteredSongList;
+
+	SearchView songsearch;
 
 	int totalSongs = 0;
 	ArrayList<song> playlist = new ArrayList<>();
@@ -480,6 +483,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		alpha.setOnClickListener(this);
 		year = (ImageButton) view.findViewById(R.id.numsong);
 		year.setOnClickListener(this);
+		songsearch = (SearchView) view.findViewById(R.id.songsearch);
+		songsearch.setOnQueryTextListener(this);
+		songsearch.setQueryHint("Search songs");
 
 	}
 
@@ -505,20 +511,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			public void onItemClick(View view, int position) {
 				songModel song = favoriteSongAdapter.getItem(position);
 				StorageUtil storageUtil = new StorageUtil(getApplicationContext());
-					playlist.clear();
-					for (songModel songs : favoriteSongList) {
-						song s = new song(songs.getMovietitle(), songs.getSongTitle(), songs.getUlr());
-						playlist.add(s);
-					}
-					storageUtil.storeAudio(playlist);
-					storageUtil.storeAudioIndex(position);
-					Intent setplaylist = new Intent(MainActivity.Broadcast_NEW_ALBUM);
-					sendBroadcast(setplaylist);
-					Intent broadcastIntent = new Intent(MainActivity.Broadcast_PLAY_NEW_AUDIO);
-					sendBroadcast(broadcastIntent);
-					closeDrawer();
-
+				playlist.clear();
+				for (songModel songs : favoriteSongList) {
+					song s = new song(songs.getMovietitle(), songs.getSongTitle(), songs.getUlr());
+					playlist.add(s);
 				}
+				storageUtil.storeAudio(playlist);
+				storageUtil.storeAudioIndex(position);
+				Intent setplaylist = new Intent(MainActivity.Broadcast_NEW_ALBUM);
+				sendBroadcast(setplaylist);
+				Intent broadcastIntent = new Intent(MainActivity.Broadcast_PLAY_NEW_AUDIO);
+				sendBroadcast(broadcastIntent);
+				closeDrawer();
+
+			}
 
 
 		}));
@@ -590,8 +596,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 	}
 
 	private void setUpSongList() {
-		//StorageUtil storageUtil = new StorageUtil(getApplicationContext());
-		//storageUtil.clearCachedAudioPlaylist();
+		StorageUtil storageUtil = new StorageUtil(getApplicationContext());
+		storageUtil.clearCachedAudioPlaylist();
 		songList = new ArrayList<>();
 		songadapter = new SongAdapter(MainActivity.this, songList, MainActivity.this);
 
@@ -605,28 +611,45 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			@Override
 			public void onItemClick(View view, int position) {
 				songModel song = songadapter.getItem(position);
+
 				StorageUtil storageUtil = new StorageUtil(getApplicationContext());
-				if (playlist == null || playlist.size() < totalSongs) {
-					playlist.clear();
+
+				if (storageUtil.loadAudio()==null || totalSongs > storageUtil.loadAudio().size()) {
 					for (songModel songs : songList) {
 						song s = new song(songs.getMovietitle(), songs.getSongTitle(), songs.getUlr());
 						playlist.add(s);
 					}
+					int index = 0;
+					for (song s : playlist) {
+						if (s.getSongName().equals(song.getSongTitle()) && s.getMovieName().equals(song.getMovietitle())) {
+							index = playlist.indexOf(s);
+						}
+					}
 					storageUtil.storeAudio(playlist);
-					storageUtil.storeAudioIndex(position);
+					storageUtil.storeAudioIndex(index);
 					Intent setplaylist = new Intent(MainActivity.Broadcast_NEW_ALBUM);
 					sendBroadcast(setplaylist);
 					Intent broadcastIntent = new Intent(MainActivity.Broadcast_PLAY_NEW_AUDIO);
 					sendBroadcast(broadcastIntent);
 					closeDrawer();
 
-				} else {
-					storageUtil.storeAudioIndex(position);
+				}else {
+					int index = 0;
+					Log.i(TAG, "onItemClick: "+song.getSongTitle() +" "+song.getMovietitle());
+					ArrayList<song> array = new StorageUtil(getApplicationContext()).loadAudio();
+					for (song s : array) {
+						if (s.getSongName().equals(song.getSongTitle()) && s.getMovieName().equals(song.getMovietitle())) {
+							Log.i(TAG, "onItemClick: "+s.getSongName()+" "+s.getMovieName());
+							index = array.indexOf(s);
+							Log.i(TAG, "onItemClick: "+s.getSongName()+" "+s.getMovieName()+" "+index);
+						}
+					}
+					storageUtil.storeAudioIndex(index);
 					Intent broadcastIntent = new Intent(MainActivity.Broadcast_PLAY_NEW_AUDIO);
 					sendBroadcast(broadcastIntent);
 					closeDrawer();
-
 				}
+
 
 			}
 		}));
@@ -637,6 +660,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 	private void prepareSongs() {
 		songList.clear();
+		filteredSongList = new ArrayList<>();
 		List<songModel> list = new ArrayList<>();
 		SortedSet<String> trackNos = new TreeSet<>();
 
@@ -681,7 +705,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		}
 
 		totalSongs = songList.size();
-
+		filteredSongList = songList;
 		songadapter.notifyDataSetChanged();
 
 	}
@@ -917,13 +941,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			}
 			case R.id.fav_pop: {
 
-				if(player != null){
-					if(player.mediaPlayer != null){
+				if (player != null) {
+					if (player.mediaPlayer != null) {
 						song s = player.getActiveSong();
-						if(checkFavoriteItem()){
+						if (checkFavoriteItem()) {
 							removeFavorite(s);
 
-						}else {
+						} else {
 							addFavorite(s);
 
 						}
@@ -935,6 +959,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 			}
 			case R.id.alphasong: {
+				Log.i(TAG, "onClick: called apha "+ascending);
 				if (ascending) {
 					ascending = false;
 					prepareSongs();
@@ -946,6 +971,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 				break;
 			}
 			case R.id.numsong: {
+				Log.i(TAG, "onClick: called numsong "+ascendingyear);
 				if (ascendingyear) {
 					ascendingyear = false;
 					prepareSongsYear();
@@ -953,6 +979,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 					ascendingyear = true;
 					prepareSongsYear();
 				}
+				break;
 			}
 
 		}
@@ -1038,6 +1065,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			mHandler.postDelayed(runnable, 1000);
 		}
 	};
+
+	@Override
+	public boolean onQueryTextSubmit(String s) {
+		return false;
+	}
+
+	@Override
+	public boolean onQueryTextChange(String s) {
+		filteredSongList = new ArrayList<>();
+		filteredSongList = filterSongs(songList, s);
+
+		songadapter.setFilter(filteredSongList);
+		return true;
+	}
 
 	public class SectionsPagerAdapter extends FragmentPagerAdapter {
 		private final List<Fragment> mFragmentList = new ArrayList<>();
@@ -1193,7 +1234,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 
 		totalSongs = songList.size();
-
+		filteredSongList = songList;
 		songadapter.notifyDataSetChanged();
 
 	}
@@ -1231,7 +1272,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		userRef.child(user.getUid()).child("Fav Songs").child(s.getMovieName()).updateChildren(map).addOnCompleteListener(new OnCompleteListener<Void>() {
 			@Override
 			public void onComplete(@NonNull Task<Void> task) {
-				if(task.isSuccessful()){
+				if (task.isSuccessful()) {
 					Toast.makeText(MainActivity.this, "Successfully Added to Favorites", Toast.LENGTH_SHORT).show();
 					fav.setImageResource(R.drawable.favon);
 				}
@@ -1249,7 +1290,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		userRef.child(user.getUid()).child("Fav Songs").child(s.getMovieName()).child(s.getSongName()).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
 			@Override
 			public void onComplete(@NonNull Task<Void> task) {
-				if(task.isSuccessful()){
+				if (task.isSuccessful()) {
 					Toast.makeText(MainActivity.this, "Successfully removed from Favorites", Toast.LENGTH_SHORT).show();
 					fav.setImageResource(R.drawable.heart);
 				}
@@ -1258,5 +1299,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 	}
 
+	public List<songModel> filterSongs(List<songModel> listsongs, String query) {
+		query = query.toLowerCase().trim();
+		final List<songModel> filteralbumlist = new ArrayList<>();
+		for (songModel songs : listsongs) {
+			final String text1 = songs.getSongTitle().toLowerCase();
+			final String text2 = songs.getMovietitle().toLowerCase();
+			final String text3 = songs.getLyricistName().toLowerCase();
+			final String text4 = String.valueOf(songs.getYear());
+			if (text1.contains(query) || text2.contains(query) || text3.contains(query) || text4.contains(query)) {
+				filteralbumlist.add(songs);
+			}
+		}
+		return filteralbumlist;
+	}
 
 }

@@ -99,4 +99,11 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder>{
 		return songlist.get(position);
 	}
 
+	public void setFilter(List<songModel> songlists) {
+		songlist = new ArrayList<>();
+		songlist.addAll(songlists);
+		notifyDataSetChanged();
+	}
+
+
 }
