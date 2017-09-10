@@ -215,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			}
 
 
-			Toast.makeText(this, "signed in", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "signed in as "+user.getEmail(), Toast.LENGTH_SHORT).show();
 		}
 
 
