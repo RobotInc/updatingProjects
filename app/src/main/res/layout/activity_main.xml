@@ -28,10 +28,16 @@
            android:layout_marginEnd="2dp"
            android:layout_marginStart="2dp"
            >
+           <android.support.v7.widget.SearchView
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:id="@+id/albumsearch"
+               android:visibility="gone"></android.support.v7.widget.SearchView>
          <android.support.v7.widget.RecyclerView
              android:layout_width="match_parent"
              android:layout_height="match_parent"
-             android:id="@+id/rv1">
+             android:id="@+id/rv1"
+             android:layout_below="@id/albumsearch">
 
          </android.support.v7.widget.RecyclerView>
        </RelativeLayout>
@@ -46,23 +52,28 @@
         app:headerLayout="@layout/nav_header_album"
         android:fitsSystemWindows="true">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="100dp"
+            android:orientation="vertical"
             android:layout_marginEnd="2dp"
-            android:layout_marginStart="2dp"
-            >
-            <android.support.v7.widget.RecyclerView
+            android:layout_marginStart="2dp">
+            <android.support.v7.widget.SearchView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/songsearch"
+                android:visibility="gone"></android.support.v7.widget.SearchView>
+            <ExpandableListView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clickable="true"
-                android:background="?attr/selectableItemBackground"
+
                 android:id="@+id/rv2">
 
-            </android.support.v7.widget.RecyclerView>
+            </ExpandableListView>
 
-        </RelativeLayout>
+        </LinearLayout>
 
     </android.support.design.widget.NavigationView>
 

@@ -13,17 +13,25 @@ public class songModel{
 	String lyricistName;
 	//byte[] images;
 	String ulr;
+	int year;
 
-	public songModel(String movietitle, String songTitle, String lyricistName, String ulr) {
+	public songModel(String movietitle, String songTitle, String lyricistName, String ulr,int year) {
 		Movietitle = movietitle;
 		this.songTitle = songTitle;
 		this.lyricistName = lyricistName;
 		//this.images = images;
 		this.ulr = ulr;
+		this.year = year;
 	}
 
 
+	public int getYear() {
+		return year;
+	}
 
+	public void setYear(int year) {
+		this.year = year;
+	}
 
 	public String getUlr() {
 		return ulr;

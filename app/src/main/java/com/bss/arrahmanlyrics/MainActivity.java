@@ -1,6 +1,9 @@
 package com.bss.arrahmanlyrics;
 
 
+import android.app.Activity;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -9,10 +12,14 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PersistableBundle;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -27,17 +34,22 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ExpandableListView;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.RadioGroup;
+import android.widget.SearchView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bss.arrahmanlyrics.adapter.ExpandableListAdapter;
 import com.bss.arrahmanlyrics.adapter.SongAdapter;
-import com.bss.arrahmanlyrics.adapter.albumAdapter;
-import com.bss.arrahmanlyrics.models.Tracks;
 import com.bss.arrahmanlyrics.models.albumModel;
 import com.bss.arrahmanlyrics.models.albumsongs;
 import com.bss.arrahmanlyrics.models.song;
@@ -92,21 +104,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 	//list
 	RecyclerView rv1;
-	RecyclerView rv2;
-	albumAdapter albumadapter;
+
+
 	SongAdapter songadapter;
 	List<albumModel> albumList;
 	List<songModel> songList;
-	List<Tracks> trackList;
 	List<albumsongs> albumsongsList;
 	int totalSongs = 0;
 	ArrayList<song> playlist = new ArrayList<>();
-
+	Point p;
 	//database values
 	public HashMap<String, Object> values = new HashMap<>();
 
 	//mediaconrols
-	ImageButton playpause, previous, next,shuffle,fav;
+	ImageButton playpause, previous, next, shuffle, fav;
 	SeekBar seekBar;
 	TextView currentTime, totalTime, moviename, songname;
 
@@ -118,8 +129,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 	EnglishFragment englishFragment;
 	TamilFragment tamilFragment;
 	private Handler mHandler = new Handler();
-	HashMap<String,Bitmap> albumcovers;
+	HashMap<String, Bitmap> albumcovers;
 
+	ExpandableListAdapter adapter;
+
+	// child data in format of header title, child title
+	private HashMap<String, List<albumsongs>> _listDataChild;
+
+	ImageButton alpha, year, searchsongs;
+	boolean ascending = true, ascendingyear = true;
 	public static final String Broadcast_PLAY_NEW_AUDIO = "com.bss.arrahmanlyrics.activites.PlayNewAudio";
 	public static final String Broadcast_NEW_ALBUM = "com.bss.arrahmanlyrics.activites.PlayNewAlbum";
 	public static final String Broadcast_PLAY = "com.bss.arrahmanlyrics.activites.Play";
@@ -333,9 +351,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 			@Override
 			public void onPageSelected(int position) {
-				if(position == 0){
+				if (position == 0) {
 					segmentedGroup.check(R.id.tamil);
-				}else if(position == 1){
+				} else if (position == 1) {
 					segmentedGroup.check(R.id.english);
 				}
 			}
@@ -407,6 +425,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		});
 
 		reference = FirebaseDatabase.getInstance().getReference().child("AR Rahman").child("Tamil");
+		reference.keepSynced(true);
 		reference.addValueEventListener(new ValueEventListener() {
 			@Override
 			public void onDataChange(DataSnapshot dataSnapshot) {
@@ -423,20 +442,32 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			}
 		});
 
+		setNavigation();
+	}
+
+	private void setNavigation() {
+		NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+		View view = navigationView.getHeaderView(0);
+		alpha = (ImageButton) view.findViewById(R.id.alphasong);
+		alpha.setOnClickListener(this);
+		year = (ImageButton) view.findViewById(R.id.numsong);
+		year.setOnClickListener(this);
+		
 	}
 
 	private void setUpAlbumList() {
 		albumList = new ArrayList<>();
 		albumsongsList = new ArrayList<>();
+
 		prepareAlbums();
 
 	}
 
 	private void setUpSongList() {
-		StorageUtil storageUtil = new StorageUtil(getApplicationContext());
-		storageUtil.clearCachedAudioPlaylist();
+		//StorageUtil storageUtil = new StorageUtil(getApplicationContext());
+		//storageUtil.clearCachedAudioPlaylist();
 		songList = new ArrayList<>();
-		songadapter = new SongAdapter(MainActivity.this, songList,MainActivity.this);
+		songadapter = new SongAdapter(MainActivity.this, songList, MainActivity.this);
 
 		rv1 = (RecyclerView) findViewById(R.id.rv1);
 		rv1.setAdapter(songadapter);
@@ -449,7 +480,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			public void onItemClick(View view, int position) {
 				songModel song = songadapter.getItem(position);
 				StorageUtil storageUtil = new StorageUtil(getApplicationContext());
-				if (storageUtil.loadAudio() == null || storageUtil.loadAudio().size() < totalSongs) {
+				if (playlist == null || playlist.size() < totalSongs) {
 					playlist.clear();
 					for (songModel songs : songList) {
 						song s = new song(songs.getMovietitle(), songs.getSongTitle(), songs.getUlr());
@@ -473,6 +504,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 			}
 		}));
+
 		prepareSongs();
 
 	}
@@ -481,28 +513,45 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		songList.clear();
 		List<songModel> list = new ArrayList<>();
 		SortedSet<String> trackNos = new TreeSet<>();
+
 		for (String albums : values.keySet()) {
 			HashMap<String, Object> songs = (HashMap<String, Object>) values.get(albums);
 
 			for (String song : songs.keySet()) {
 				if (!song.equals("IMAGE")) {
 					HashMap<String, Object> oneSong = (HashMap<String, Object>) songs.get(song);
-					songModel newSong = new songModel(albums, song, oneSong.get("Lyricist").toString(), String.valueOf(oneSong.get("Download")));
+					Log.i(TAG, "prepareSongs: "+albums +" "+song);
+					songModel newSong = new songModel(albums, song, oneSong.get("Lyricist").toString(), String.valueOf(oneSong.get("Download")),Integer.parseInt(String.valueOf(oneSong.get("Year"))));
 					list.add(newSong);
 					trackNos.add(song);
 				}
 
 			}
 		}
-
-
+		ArrayList<songModel> dummy = new ArrayList();
 		for (String Track : trackNos) {
 			for (songModel songNo : list) {
 				if (songNo.getSongTitle().equals(Track)) {
-					songList.add(songNo);
+					dummy.add(songNo);
 				}
 			}
 
+		}
+		if (ascending) {
+			for (String Track : trackNos) {
+				for (songModel songNo : list) {
+					if (songNo.getSongTitle().equals(Track)) {
+						songList.add(songNo);
+					}
+				}
+
+			}
+		} else {
+			for (int a = dummy.size() - 1; a >= 0; a--) {
+				songModel song = dummy.get(a);
+				songList.add(song);
+
+			}
 		}
 
 		totalSongs = songList.size();
@@ -519,6 +568,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 	private void prepareAlbums() {
 		albumList.clear();
+		_listDataChild = new HashMap<>();
 
 		List<albumModel> list = new ArrayList<>();
 
@@ -527,7 +577,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			list.add(new albumModel(album, ((HashMap<String, Object>) values.get(album)).size() - 1));
 			trackNos.add(album);
 		}
-		trackList = new ArrayList<>();
+
 		for (String tracks : trackNos) {
 			for (albumModel album : list) {
 				if (album.getMovietitle().equals(tracks)) {
@@ -536,25 +586,54 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 					for (String song : songs.keySet()) {
 						if (!song.equals("IMAGE")) {
 							HashMap<String, Object> oneSong = (HashMap<String, Object>) songs.get(song);
-							albumsongs albumsong = new albumsongs(song, String.valueOf(oneSong.get("Track NO")), String.valueOf(oneSong.get("Lyricist")));
+							albumsongs albumsong = new albumsongs(song, String.valueOf(oneSong.get("Track NO")), String.valueOf(oneSong.get("Lyricist")), String.valueOf(oneSong.get("Download")));
 							albumsongsList.add(albumsong);
 						}
 					}
-					Tracks tracks1 = new Tracks(album.getMovietitle(), getSortedList(albumsongsList));
 
-					trackList.add(tracks1);
+
 					albumList.add(album);
+					_listDataChild.put(album.getMovietitle(), getSortedList(albumsongsList));
+
 				}
 			}
 		}
+		for (String name : _listDataChild.keySet()) {
+			Log.i(TAG, "prepareAlbums: " + name + " " + _listDataChild.get(name).size());
+		}
 
-		albumadapter = new albumAdapter(trackList, MainActivity.this, albumList,MainActivity.this);
-		rv2 = (RecyclerView) findViewById(R.id.rv2);
-		rv2.setAdapter(albumadapter);
-		RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
-		rv2.setLayoutManager(layoutManager);
+		adapter = new ExpandableListAdapter(this, albumList, _listDataChild, MainActivity.this);
+		final ExpandableListView albumview = (ExpandableListView) findViewById(R.id.rv2);
+		albumview.setAdapter(adapter);
+		/*albumview.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+			@Override
+			public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+				return  albumview.isGroupExpanded(groupPosition) ? albumview.collapseGroup(groupPosition) : albumview.expandGroup(groupPosition);
+			}
+		});*/
 
+		albumview.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+			@Override
+			public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i1, long l) {
+				List<albumsongs> songlistalbums = _listDataChild.get(albumList.get(i).getMovietitle());
+				StorageUtil storageUtil = new StorageUtil(getApplicationContext());
 
+				playlist.clear();
+				for (albumsongs songs : songlistalbums) {
+					song s = new song(albumList.get(i).getMovietitle(), songs.getSongName(), songs.getUlr());
+					playlist.add(s);
+				}
+				storageUtil.storeAudio(playlist);
+				storageUtil.storeAudioIndex(i1);
+				Intent setplaylist = new Intent(MainActivity.Broadcast_NEW_ALBUM);
+				sendBroadcast(setplaylist);
+				Intent broadcastIntent = new Intent(MainActivity.Broadcast_PLAY_NEW_AUDIO);
+				sendBroadcast(broadcastIntent);
+				closeDrawer();
+
+				return false;
+			}
+		});
 
 
 	}
@@ -665,7 +744,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 						playpause.setImageResource(R.drawable.play);
 						player.pauseMedia();
 					} else {
-						if(player.mediaPlayer != null) {
+						if (player.mediaPlayer != null) {
 							if (player.getCurrentPosition() > 0) player.resumeMedia();
 							playpause.setImageResource(R.drawable.pause);
 						}
@@ -694,11 +773,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 				break;
 			}
 			case R.id.shuffle: {
-				if(player != null){
-					if(player.isShuffleOn()){
+				if (player != null) {
+					if (player.isShuffleOn()) {
 						player.setShuffleOnOff(false);
 						shuffle.setImageResource(R.drawable.shuffleoff);
-					}else {
+					} else {
 						player.setShuffleOnOff(true);
 						shuffle.setImageResource(R.drawable.shuffle);
 
@@ -706,10 +785,37 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 				}
 				break;
 			}
+			case R.id.fav_pop: {
+				if (p != null) {
+					showPopup(MainActivity.this, p);
+					Log.i(TAG, "onClick: called");
+					break;
+				}
+			}
+			case R.id.alphasong: {
+				if (ascending) {
+					ascending = false;
+					prepareSongs();
+				} else {
+					ascending = true;
+					prepareSongs();
+				}
+
+				break;
+			}
+			case R.id.numsong:{
+				if (ascendingyear) {
+					ascendingyear = false;
+					prepareSongsYear();
+				} else {
+					ascendingyear = true;
+					prepareSongsYear();
+				}
+			}
+
 		}
 
 	}
-
 
 	@Override
 	public void update() {
@@ -745,14 +851,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 	}
 
-	@Override
-	public void showDialog(String song,String movie) {
 
-		if(dialog != null){
+	@Override
+	public void showDialog(String song, String movie) {
+
+		if (dialog != null) {
 			Log.i(TAG, "showDialog: loading ");
 
-				dialog.setMessage("Loading "+Helper.FirstLetterCaps(song)+"\nFrom "+Helper.FirstLetterCaps(movie));
-				dialog.show();
+			dialog.setMessage("Loading " + Helper.FirstLetterCaps(song) + "\nFrom " + Helper.FirstLetterCaps(movie));
+			dialog.show();
 
 		}
 	}
@@ -818,7 +925,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		public CharSequence getPageTitle(int position) {
 			return mFragmentTitleList.get(position);
 		}
+
 	}
+
 
 	public void closeDrawer() {
 		final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -829,18 +938,123 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		}
 	}
 
-	public void setImagesList(){
+	public void setImagesList() {
 
 		albumcovers = new HashMap<>();
-		for(String movies : values.keySet()){
-			HashMap<String,Object> movie = (HashMap<String, Object>) values.get(movies);
-			albumcovers.put(movies,getBitmap(String.valueOf(movie.get("IMAGE"))));
+		for (String movies : values.keySet()) {
+			HashMap<String, Object> movie = (HashMap<String, Object>) values.get(movies);
+			albumcovers.put(movies, getBitmap(String.valueOf(movie.get("IMAGE"))));
 
 		}
 
 	}
 
-	public Bitmap getImageBitmap(String movie){
+	public Bitmap getImageBitmap(String movie) {
 		return albumcovers.get(movie);
 	}
+
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+
+		int[] location = new int[2];
+		ImageButton button = (ImageButton) findViewById(R.id.fav_pop);
+
+		// Get the x, y location and store it in the location[] array
+		// location[0] = x, location[1] = y.
+		button.getLocationOnScreen(location);
+
+		//Initialize the Point with x, and y positions
+		p = new Point();
+		p.x = location[0];
+		p.y = location[1];
+	}
+
+	// The method that displays the popup.
+	private void showPopup(final Activity context, Point p) {
+		int popupWidth = 200;
+		int popupHeight = 150;
+
+		// Inflate the popup_layout.xml
+		LinearLayout viewGroup = (LinearLayout) context.findViewById(R.id.layout);
+		LayoutInflater layoutInflater = (LayoutInflater) context
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View layout = layoutInflater.inflate(R.layout.fragment_other_lyrics, viewGroup);
+
+		// Creating the PopupWindow
+		final PopupWindow popup = new PopupWindow(context);
+		popup.setContentView(layout);
+		popup.setWidth(popupWidth);
+		popup.setHeight(popupHeight);
+		popup.setFocusable(true);
+
+		// Some offset to align the popup a bit to the right, and a bit down, relative to button's position.
+		int OFFSET_X = 30;
+		int OFFSET_Y = 30;
+
+		// Clear the default translucent background
+		popup.setBackgroundDrawable(new BitmapDrawable());
+
+		// Displaying the popup at the specified location, + offsets.
+		popup.showAtLocation(layout, Gravity.NO_GRAVITY, p.x + OFFSET_X, p.y + OFFSET_Y);
+
+		// Getting a reference to Close button, and close the popup when clicked.
+		Button close = (Button) layout.findViewById(R.id.close);
+		close.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				popup.dismiss();
+			}
+		});
+	}
+
+	private void prepareSongsYear() {
+		songList.clear();
+		List<songModel> list = new ArrayList<>();
+		SortedSet<Integer> trackNos = new TreeSet<>();
+
+		for (String albums : values.keySet()) {
+			HashMap<String, Object> songs = (HashMap<String, Object>) values.get(albums);
+
+			for (String song : songs.keySet()) {
+				if (!song.equals("IMAGE")) {
+					HashMap<String, Object> oneSong = (HashMap<String, Object>) songs.get(song);
+					songModel newSong = new songModel(albums, song, oneSong.get("Lyricist").toString(), String.valueOf(oneSong.get("Download")),Integer.parseInt(String.valueOf(oneSong.get("Year"))));
+					list.add(newSong);
+					trackNos.add(Integer.parseInt(String.valueOf(oneSong.get("Year"))));
+				}
+
+			}
+		}
+		ArrayList<songModel> dummy = new ArrayList<>();
+		for (int Track : trackNos) {
+			for (songModel songNo : list) {
+				if (songNo.getYear() == Track) {
+					dummy.add(songNo);
+				}
+			}
+
+		}
+		if(ascendingyear){
+			for (int Track : trackNos) {
+				for (songModel songNo : list) {
+					if (songNo.getYear() == Track) {
+						songList.add(songNo);
+					}
+				}
+
+			}
+		}else {
+			for(int a = dummy.size()-1;a>=0;a--){
+				songList.add(dummy.get(a));
+			}
+		}
+
+
+		totalSongs = songList.size();
+
+		songadapter.notifyDataSetChanged();
+
+	}
+
 }

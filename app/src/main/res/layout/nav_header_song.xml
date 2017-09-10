@@ -31,18 +31,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/sort_alphabetical"
+        android:id="@+id/alphasong"
         android:background="@android:color/transparent"
         android:layout_weight="1"/>
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/sort_numeric"
+        android:id="@+id/numsong"
         android:background="@android:color/transparent"
         android:layout_weight="1"/>
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/search"
+        android:id="@+id/searchsongs"
         android:background="@android:color/transparent"
         android:layout_weight="1"/>
 </LinearLayout>

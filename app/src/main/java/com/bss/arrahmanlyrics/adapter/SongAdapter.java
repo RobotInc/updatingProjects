@@ -16,8 +16,6 @@ import java.util.List;
 
 import com.bss.arrahmanlyrics.R;
 import com.bss.arrahmanlyrics.utils.Helper;
-import com.bumptech.glide.Glide;
-
 /**
  * Created by mohan on 5/20/17.
  */

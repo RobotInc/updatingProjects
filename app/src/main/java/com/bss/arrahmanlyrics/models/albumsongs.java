@@ -11,13 +11,23 @@ public class albumsongs implements Parcelable {
     String songName;
     String trackNo;
     String lyricistNames;
+    String ulr;
 
 
-    public albumsongs(String songName, String trackNo, String lyricistNames) {
+    public albumsongs(String songName, String trackNo, String lyricistNames,String ulr) {
         this.songName = songName;
         this.trackNo = trackNo;
         this.lyricistNames = lyricistNames;
+        this.ulr = ulr;
 
+    }
+
+    public String getUlr() {
+        return ulr;
+    }
+
+    public void setUlr(String ulr) {
+        this.ulr = ulr;
     }
 
     protected albumsongs(Parcel in) {
