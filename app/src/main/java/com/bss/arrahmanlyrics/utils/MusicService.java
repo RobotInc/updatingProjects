@@ -12,16 +12,18 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v7.app.NotificationCompat;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.bss.arrahmanlyrics.MainActivity;
@@ -58,17 +60,46 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 	private MediaSessionManager mediaSessionManager;
 	private MediaSessionCompat mediaSession;
 	private MediaControllerCompat.TransportControls transportControls;
+
+	boolean lostFocusLoss = false;
 	public void seekTo(int i) {
 		mediaPlayer.seekTo(i);
 	}
+
 	private static final int NOTIFICATION_ID = 101;
 	NotificationCompat.Builder notificationBuilder;
+
+	// The volume we set the media player to when we lose audio focus, but are
+	// allowed to reduce the volume instead of stopping playback.
+	public static final float VOLUME_DUCK = 0.2f;
+	// The volume we set the media player when we have audio focus.
+	public static final float VOLUME_NORMAL = 1.0f;
+
+	// we don't have audio focus, and can't duck (play at a low volume)
+	private static final int AUDIO_NO_FOCUS_NO_DUCK = 0;
+	// we don't have focus, but can duck (play at a low volume)
+	private static final int AUDIO_NO_FOCUS_CAN_DUCK = 1;
+	// we have full audio focus
+	private static final int AUDIO_FOCUSED = 2;
+
+	private boolean mPlayOnFocusGain;
+
+	private boolean mAudioNoisyReceiverRegistered;
+
+
+	private int mCurrentAudioFocusState = AUDIO_NO_FOCUS_NO_DUCK;
+	private AudioManager audioManager;
+
+	boolean ongoingcall = false;
+	private static boolean ignoreAudioFocus = false;
+	private PhoneStateListener phoneStateListener;
 
 	public static final String ACTION_PLAY = "com.bss.arrahmanlyrics.ACTION_PLAY";
 	public static final String ACTION_PAUSE = "com.bss.arrahmanlyrics.ACTION_PAUSE";
 	public static final String ACTION_PREVIOUS = "com.bss.arrahmanlyrics.ACTION_PREVIOUS";
 	public static final String ACTION_NEXT = "com.bss.arrahmanlyrics.ACTION_NEXT";
 	public static final String ACTION_STOP = "com.bss.arrahmanlyrics.ACTION_STOP";
+
 	public interface mainActivityCallback {
 		void update();
 
@@ -79,10 +110,90 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 
 	@Override
 	public void onCreate() {
+		audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+
+
+		try {
+			phoneStateListener = new PhoneStateListener() {
+				@Override
+				public void onCallStateChanged(int state, String incomingNumber) {
+					if (state == TelephonyManager.CALL_STATE_RINGING) {
+						if (mediaPlayer != null) {
+							if (mediaPlayer.isPlaying()) {
+								pauseMedia();
+								ongoingcall = true;
+							}
+						}
+
+					} else if (state == TelephonyManager.CALL_STATE_IDLE) {
+						if (mediaPlayer != null) {
+							if (ongoingcall) {
+								ongoingcall = false;
+								resumeMedia();
+							}
+						}
+
+					} else if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
+
+					}
+					super.onCallStateChanged(state, incomingNumber);
+				}
+			};
+			TelephonyManager mgr = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+			if (mgr != null) {
+				mgr.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+			}
+		} catch (Exception e) {
+			Log.e("tmessages", e.toString());
+		}
 		super.onCreate();
+
 		register_setNewalbum();
 		register_playNewAudio();
 	}
+
+	private AudioManager.OnAudioFocusChangeListener afChangeListener = new AudioManager.OnAudioFocusChangeListener() {
+		@Override
+		public void onAudioFocusChange(int i) {
+			switch (i){
+				case AudioManager.AUDIOFOCUS_LOSS:{
+					if(mediaPlayer != null){
+						if(mediaPlayer.isPlaying()){
+							pauseMedia();
+							lostFocusLoss = true;
+
+						}
+					}
+
+					break;
+				}
+
+				case AudioManager.AUDIOFOCUS_GAIN:{
+					requestAudioFocus();
+					if(mediaPlayer != null){
+						if(lostFocusLoss){
+							resumeMedia();
+							lostFocusLoss = false;
+						}
+					}
+					break;
+
+				}
+
+				case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:{
+					if(mediaPlayer != null){
+						if(mediaPlayer.isPlaying()){
+							pauseMedia();
+							lostFocusLoss = true;
+
+						}
+					}
+					break;
+				}
+
+			}
+		}
+	};
 
 	@Nullable
 	@Override
@@ -97,6 +208,11 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		//getting systems default ringtone
+		if (requestAudioFocus() == false) {
+			//Could not gain focus
+			stopSelf();
+		}
+
 		if (mediaSessionManager == null) {
 			try {
 				initMediaSession();
@@ -200,6 +316,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 			}
 		});
 	}
+
 	private void updateMetaData() {
 		Bitmap albumArt = BitmapFactory.decodeResource(getResources(),
 				R.drawable.ic_launcher); //replace with medias albumArt
@@ -330,7 +447,10 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 			stopMedia();
 			mediaPlayer.release();
 		}
-
+		if (phoneStateListener != null) {
+			TelephonyManager telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+			telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
+		}
 		mediaPlayer.release();
 		unregisterReceiver(setNewAlbum);
 		unregisterReceiver(playNewAudio);
@@ -577,7 +697,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 		//reset mediaPlayer
 		mediaPlayer.reset();
 		initMediaPlayer();
-		Log.i(TAG, "skipToPrevious: "+audioIndex);
+		Log.i(TAG, "skipToPrevious: " + audioIndex);
 	}
 
 	public void skipToNext() {
@@ -604,7 +724,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 		initMediaPlayer();
 		updateMetaData();
 		buildNotification(PlaybackStatus.PLAYING);
-		Log.i(TAG, "skipToNext: "+audioIndex);
+		Log.i(TAG, "skipToNext: " + audioIndex);
 	}
 
 	public boolean isPlaying() {
@@ -617,8 +737,8 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 	}
 
 	public int getDuration() {
-		
-		
+
+
 		return mediaPlayer.getDuration();
 	}
 
@@ -639,7 +759,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 
 			StorageUtil storage = new StorageUtil(getApplicationContext());
 			playlist = getShuffledList(storage.loadAudio());
-			if(mediaPlayer != null) {
+			if (mediaPlayer != null) {
 				if (isPlaying() || mediaPlayer.getCurrentPosition() > 0) {
 					for (song sg : playlist) {
 						if (sg.getMovieName().equals(activeSong.getMovieName()) && sg.getSongName().equals(activeSong.getSongName())) {
@@ -672,5 +792,17 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 		}
 	}
 
+	public boolean requestAudioFocus() {
+		int result = audioManager.requestAudioFocus(afChangeListener,
+				// Use the music stream.
+				AudioManager.STREAM_MUSIC,
+				// Request permanent focus.
+				AudioManager.AUDIOFOCUS_GAIN);
+
+		if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+			return true;
+			// Start playback.
+		} else return false;
+	}
 
 }

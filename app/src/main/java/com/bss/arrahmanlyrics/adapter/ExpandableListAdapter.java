@@ -1,5 +1,6 @@
 package com.bss.arrahmanlyrics.adapter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -30,7 +31,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 	private HashMap<String, List<albumsongs>> _listDataChild;
 
 	public ExpandableListAdapter(Context context, List<albumModel> listDataHeader,
-			HashMap<String, List<albumsongs>> listChildData,MainActivity activity) {
+	                             HashMap<String, List<albumsongs>> listChildData, MainActivity activity) {
 		this._context = context;
 		this._listDataHeader = listDataHeader;
 		this._listDataChild = listChildData;
@@ -50,10 +51,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
 	@Override
 	public View getChildView(int groupPosition, final int childPosition,
-			boolean isLastChild, View convertView, ViewGroup parent) {
+	                         boolean isLastChild, View convertView, ViewGroup parent) {
 
 		albumsongs songs = getChild(groupPosition, childPosition);
-		Log.i(TAG, "getChildView: "+String.valueOf(songs));
+		Log.i(TAG, "getChildView: " + String.valueOf(songs));
 
 		if (convertView == null) {
 			LayoutInflater infalInflater = (LayoutInflater) this._context
@@ -61,7 +62,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 			convertView = infalInflater.inflate(R.layout.album_song_list_view, null);
 		}
 		TextView trackNo = (TextView) convertView.findViewById(R.id.trackNo);
-		TextView lyricist= (TextView) convertView.findViewById(R.id.Songlyricist);
+		TextView lyricist = (TextView) convertView.findViewById(R.id.Songlyricist);
 		TextView songtitle = (TextView) convertView.findViewById(R.id.Songtitle);
 		trackNo.setText(songs.getTrackNo());
 		lyricist.setText(Helper.FirstLetterCaps(songs.getLyricistNames()));
@@ -71,7 +72,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
 	@Override
 	public int getChildrenCount(int groupPosition) {
-		Log.i(TAG, "getChildrenCount: "+_listDataChild);
+		Log.i(TAG, "getChildrenCount: " + _listDataChild);
 
 		return this._listDataChild.get(this._listDataHeader.get(groupPosition).getMovietitle())
 				.size();
@@ -94,8 +95,8 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
 	@Override
 	public View getGroupView(int groupPosition, boolean isExpanded,
-			View convertView, ViewGroup parent) {
-		albumModel album= getGroup(groupPosition);
+	                         View convertView, ViewGroup parent) {
+		albumModel album = getGroup(groupPosition);
 		if (convertView == null) {
 			LayoutInflater infalInflater = (LayoutInflater) this._context
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -123,4 +124,60 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 		return true;
 	}
 
+	/*public void setFilter(List<albumModel> list,HashMap<String,List<albumsongs>> map){
+		this._listDataHeader.clear();
+		this._listDataHeader = list;
+		this._listDataChild.clear();
+		this._listDataChild = map;
+		notifyDataSetChanged();
+
+	}*/
+
+	public void filterData(List<albumModel> models,HashMap<String,List<albumsongs>> map, String query) {
+
+		query = query.toLowerCase();
+		if(query.isEmpty()){
+			_listDataHeader = new ArrayList<>();
+			_listDataChild = new HashMap<>();
+			_listDataHeader.addAll(models);
+			_listDataChild.putAll(map);
+			notifyDataSetChanged();
+			return;
+		}
+		List<albumModel> dummy = new ArrayList<>();
+		HashMap<String, List<albumsongs>> dummy2 = new HashMap<>();
+
+		for (albumModel model : models) {
+			String name = model.getMovietitle().toLowerCase();
+			if (name.contains(query)) {
+				dummy.add(model);
+				dummy2.put(model.getMovietitle(), map.get(model.getMovietitle()));
+			}
+		}
+		if(dummy.size()>0){
+			_listDataHeader = new ArrayList<>();
+			_listDataChild = new HashMap<>();
+			_listDataHeader.addAll(dummy);
+			_listDataChild.putAll(dummy2);
+		}
+		notifyDataSetChanged();
+	}
+	public HashMap<String,List<albumsongs>> get_listDataChild(){
+		return _listDataChild;
+	}
+	public List<albumModel> get_listDataHeader(){
+		return _listDataHeader;
+	}
+
+	public void setall(List<albumModel> dummy,HashMap<String, List<albumsongs>> dummy2){
+		if(dummy.size()>0){
+			_listDataHeader.clear();
+			_listDataChild.clear();
+			_listDataHeader = dummy;
+			_listDataChild = dummy2;
+		}
+		notifyDataSetChanged();
+	}
+
 }
+

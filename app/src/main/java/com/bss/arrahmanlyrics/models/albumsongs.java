@@ -7,19 +7,29 @@ import android.os.Parcelable;
  * Created by mohan on 5/20/17.
  */
 
-public class albumsongs implements Parcelable {
+public class albumsongs{
     String songName;
     String trackNo;
     String lyricistNames;
     String ulr;
+    String year;
 
 
-    public albumsongs(String songName, String trackNo, String lyricistNames,String ulr) {
+    public albumsongs(String songName, String trackNo, String lyricistNames,String ulr,String year) {
         this.songName = songName;
         this.trackNo = trackNo;
         this.lyricistNames = lyricistNames;
         this.ulr = ulr;
+        this.year = year;
 
+    }
+
+    public String getYear() {
+        return year;
+    }
+
+    public void setYear(String year) {
+        this.year = year;
     }
 
     public String getUlr() {
@@ -37,30 +47,6 @@ public class albumsongs implements Parcelable {
 
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(songName);
-        dest.writeString(trackNo);
-        dest.writeString(lyricistNames);
-
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public static final Creator<albumsongs> CREATOR = new Creator<albumsongs>() {
-        @Override
-        public albumsongs createFromParcel(Parcel in) {
-            return new albumsongs(in);
-        }
-
-        @Override
-        public albumsongs[] newArray(int size) {
-            return new albumsongs[size];
-        }
-    };
 
     public String getSongName() {
         return songName;

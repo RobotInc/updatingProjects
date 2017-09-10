@@ -9,6 +9,7 @@ import android.os.Parcel;
 
 public class albumModel {
 	String Movietitle;
+
 	int numOfSongs;
 	//byte[] imageString;
 	//private Bitmap image;
@@ -25,6 +26,7 @@ public class albumModel {
 		this.Movietitle = movietitle;
 
 		this.numOfSongs = numOfSongs;
+
 
 
 	}

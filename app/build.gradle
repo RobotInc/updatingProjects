@@ -54,6 +54,10 @@ dependencies {
     //slidinguplayout
     implementation 'com.sothree.slidinguppanel:library:3.3.1'
 
+    //rippleeffect
+    implementation 'com.balysv:material-ripple:1.0.2'
+
+
 }
 
 

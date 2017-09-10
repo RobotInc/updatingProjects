@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -22,9 +23,11 @@ import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -122,8 +125,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 	List<albumsongs> albumsongsList;
 	List<songModel> favoriteSongList;
 	List<songModel> filteredSongList;
+	List<albumModel> filteralbumlist;
+
 
 	SearchView songsearch;
+	SearchView albumsearch;
+
 
 	int totalSongs = 0;
 	ArrayList<song> playlist = new ArrayList<>();
@@ -150,6 +157,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 	// child data in format of header title, child title
 	private HashMap<String, List<albumsongs>> _listDataChild;
+	private HashMap<String, List<albumsongs>> filterlistDataChild;
 	ImageButton alpha, year, searchsongs;
 	ImageView up;
 	FavoriteSongAdapter favoriteSongAdapter;
@@ -174,6 +182,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		setContentView(R.layout.activity_main);
 		auth = FirebaseAuth.getInstance();
 
+		int permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE);
+
 
 		//signin initialize
 		GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -195,13 +205,37 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		if (user == null) {
 			signIn();
 		} else {
-			initUI();
+
+			if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+				Toast.makeText(this, "Please grant \"read call state premission\" for smooth audio playback", Toast.LENGTH_LONG).show();
+				ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_PHONE_STATE}, 121);
+			} else {
+				initUI();
+			}
+
+
 			Toast.makeText(this, "signed in", Toast.LENGTH_SHORT).show();
 		}
 
 
 	}
 
+	@Override
+	public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+		switch (requestCode) {
+			case 121:
+				if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+					//TODO
+					initUI();
+				}else {
+
+				}
+				break;
+
+			default:
+				break;
+		}
+	}
 	//app signin
 	private void signIn() {
 		Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
@@ -478,14 +512,35 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 	private void setNavigation() {
 		NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+		NavigationView navigationView2 = (NavigationView) findViewById(R.id.nav_view2);
 		View view = navigationView.getHeaderView(0);
-		alpha = (ImageButton) view.findViewById(R.id.alphasong);
-		alpha.setOnClickListener(this);
-		year = (ImageButton) view.findViewById(R.id.numsong);
-		year.setOnClickListener(this);
+		View view2 = navigationView2.getHeaderView(0);
+		//alpha = (ImageButton) view.findViewById(R.id.alphasong);
+		//alpha.setOnClickListener(this);
+		//year = (ImageButton) view.findViewById(R.id.numsong);
+		//year.setOnClickListener(this);
 		songsearch = (SearchView) view.findViewById(R.id.songsearch);
 		songsearch.setOnQueryTextListener(this);
 		songsearch.setQueryHint("Search songs");
+
+		albumsearch = (SearchView) view2.findViewById(R.id.albumsearch);
+
+		albumsearch.setQueryHint("Search Album");
+
+		albumsearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+			@Override
+			public boolean onQueryTextSubmit(String s) {
+				return false;
+			}
+
+			@Override
+			public boolean onQueryTextChange(String s) {
+
+					adapter.filterData(albumList,_listDataChild,s);
+
+				return true;
+			}
+		});
 
 	}
 
@@ -614,7 +669,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 				StorageUtil storageUtil = new StorageUtil(getApplicationContext());
 
-				if (storageUtil.loadAudio()==null || totalSongs > storageUtil.loadAudio().size()) {
+				if (storageUtil.loadAudio() == null || totalSongs > storageUtil.loadAudio().size()) {
 					for (songModel songs : songList) {
 						song s = new song(songs.getMovietitle(), songs.getSongTitle(), songs.getUlr());
 						playlist.add(s);
@@ -633,15 +688,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 					sendBroadcast(broadcastIntent);
 					closeDrawer();
 
-				}else {
+				} else {
 					int index = 0;
-					Log.i(TAG, "onItemClick: "+song.getSongTitle() +" "+song.getMovietitle());
+					Log.i(TAG, "onItemClick: " + song.getSongTitle() + " " + song.getMovietitle());
 					ArrayList<song> array = new StorageUtil(getApplicationContext()).loadAudio();
 					for (song s : array) {
 						if (s.getSongName().equals(song.getSongTitle()) && s.getMovieName().equals(song.getMovietitle())) {
-							Log.i(TAG, "onItemClick: "+s.getSongName()+" "+s.getMovieName());
+							Log.i(TAG, "onItemClick: " + s.getSongName() + " " + s.getMovieName());
 							index = array.indexOf(s);
-							Log.i(TAG, "onItemClick: "+s.getSongName()+" "+s.getMovieName()+" "+index);
+							Log.i(TAG, "onItemClick: " + s.getSongName() + " " + s.getMovieName() + " " + index);
 						}
 					}
 					storageUtil.storeAudioIndex(index);
@@ -725,6 +780,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 	private void prepareAlbums() {
 		albumList.clear();
+
 		_listDataChild = new HashMap<>();
 
 		List<albumModel> list = new ArrayList<>();
@@ -743,7 +799,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 					for (String song : songs.keySet()) {
 						if (!song.equals("IMAGE")) {
 							HashMap<String, Object> oneSong = (HashMap<String, Object>) songs.get(song);
-							albumsongs albumsong = new albumsongs(song, String.valueOf(oneSong.get("Track NO")), String.valueOf(oneSong.get("Lyricist")), String.valueOf(oneSong.get("Download")));
+							albumsongs albumsong = new albumsongs(song, String.valueOf(oneSong.get("Track NO")), String.valueOf(oneSong.get("Lyricist")), String.valueOf(oneSong.get("Download")), String.valueOf(oneSong.get("Year")));
 							albumsongsList.add(albumsong);
 						}
 					}
@@ -755,6 +811,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 				}
 			}
 		}
+
 		for (String name : _listDataChild.keySet()) {
 			Log.i(TAG, "prepareAlbums: " + name + " " + _listDataChild.get(name).size());
 		}
@@ -772,12 +829,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		albumview.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
 			@Override
 			public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i1, long l) {
-				List<albumsongs> songlistalbums = _listDataChild.get(albumList.get(i).getMovietitle());
+				List<albumModel> model = adapter.get_listDataHeader();
+				HashMap<String, List<albumsongs>> map = adapter.get_listDataChild();
+
+
+				List<albumsongs> songlistalbums = map.get(model.get(i).getMovietitle());
 				StorageUtil storageUtil = new StorageUtil(getApplicationContext());
 
 				playlist.clear();
 				for (albumsongs songs : songlistalbums) {
-					song s = new song(albumList.get(i).getMovietitle(), songs.getSongName(), songs.getUlr());
+					song s = new song(model.get(i).getMovietitle(), songs.getSongName(), songs.getUlr());
 					playlist.add(s);
 				}
 				storageUtil.storeAudio(playlist);
@@ -958,7 +1019,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 				break;
 
 			}
-			case R.id.alphasong: {
+		/*	case R.id.alphasong: {
 				Log.i(TAG, "onClick: called apha "+ascending);
 				if (ascending) {
 					ascending = false;
@@ -980,7 +1041,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 					prepareSongsYear();
 				}
 				break;
-			}
+			}*/
 
 		}
 
@@ -1011,7 +1072,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 				}
 
 
-				playpause.setImageResource(android.R.drawable.ic_media_play);
+				//playpause.setImageResource(android.R.drawable.ic_media_play);
 			}
 
 
@@ -1069,6 +1130,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 	@Override
 	public boolean onQueryTextSubmit(String s) {
 		return false;
+
 	}
 
 	@Override
@@ -1079,6 +1141,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		songadapter.setFilter(filteredSongList);
 		return true;
 	}
+
 
 	public class SectionsPagerAdapter extends FragmentPagerAdapter {
 		private final List<Fragment> mFragmentList = new ArrayList<>();

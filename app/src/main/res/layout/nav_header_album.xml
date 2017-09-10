@@ -15,7 +15,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
+        android:layout_marginTop="20dp"
         android:text="Album"
         android:fontFamily="@font/capriola"
         android:layout_gravity="center"
@@ -28,23 +28,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         >
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/sort_alphabetical"
-            android:id="@+id/alpha"
-            android:background="@android:color/transparent"
-            android:layout_weight="1"/>
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/sort_numeric"
-            android:background="@android:color/transparent"
-            android:layout_weight="1"/>
 
         <SearchView
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="35dp"
+            android:id="@+id/albumsearch"
             android:layout_weight="5" />
         <!--<ImageButton
             android:layout_width="wrap_content"
