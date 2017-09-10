@@ -4,6 +4,7 @@ package com.bss.arrahmanlyrics;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -19,6 +20,7 @@ import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -39,7 +41,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ExpandableListView;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RadioGroup;
@@ -49,6 +53,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bss.arrahmanlyrics.adapter.ExpandableListAdapter;
+import com.bss.arrahmanlyrics.adapter.FavoriteSongAdapter;
 import com.bss.arrahmanlyrics.adapter.SongAdapter;
 import com.bss.arrahmanlyrics.models.albumModel;
 import com.bss.arrahmanlyrics.models.albumsongs;
@@ -78,6 +83,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -103,13 +109,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 	int count;
 
 	//list
-	RecyclerView rv1;
-
+	RecyclerView rv1, rv3;
+	SlidingUpPanelLayout favoritePanel;
 
 	SongAdapter songadapter;
 	List<albumModel> albumList;
 	List<songModel> songList;
 	List<albumsongs> albumsongsList;
+	List<songModel> favoriteSongList;
+
 	int totalSongs = 0;
 	ArrayList<song> playlist = new ArrayList<>();
 	Point p;
@@ -135,8 +143,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 	// child data in format of header title, child title
 	private HashMap<String, List<albumsongs>> _listDataChild;
-
 	ImageButton alpha, year, searchsongs;
+	ImageView up;
+	FavoriteSongAdapter favoriteSongAdapter;
+	HashMap<String, ArrayList<String>> favoritesMab;
 	boolean ascending = true, ascendingyear = true;
 	public static final String Broadcast_PLAY_NEW_AUDIO = "com.bss.arrahmanlyrics.activites.PlayNewAudio";
 	public static final String Broadcast_NEW_ALBUM = "com.bss.arrahmanlyrics.activites.PlayNewAlbum";
@@ -296,6 +306,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			drawer.closeDrawer(GravityCompat.START);
 		} else if (drawer.isDrawerOpen(GravityCompat.END)) {
 			drawer.closeDrawer(GravityCompat.END);
+		} else if (favoritePanel != null &&
+				(favoritePanel.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED || favoritePanel.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED)) {
+			favoritePanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+
 		} else {
 
 			super.onBackPressed();
@@ -316,6 +330,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		next = (ImageButton) findViewById(R.id.next);
 		shuffle = (ImageButton) findViewById(R.id.shuffle);
 		fav = (ImageButton) findViewById(R.id.fav_pop);
+		fav.setOnClickListener(this);
 
 		viewPager = (CustomViewPager) findViewById(R.id.vg);
 		//viewPager.setPagingEnabled(false);
@@ -381,7 +396,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			@Override
 			public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
 				if (b) {
-					player.seekTo(i);
+					if (player != null) {
+						if (player.mediaPlayer != null) {
+							player.seekTo(i);
+						}
+					}
+
 				}
 			}
 
@@ -433,6 +453,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 				setImagesList();
 				setUpAlbumList();
 				setUpSongList();
+				setUpFavorites();
 				dialog.hide();
 			}
 
@@ -443,6 +464,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		});
 
 		setNavigation();
+		favoritePanel = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
+		favoritePanel.setAnchorPoint(0.7f);
+
 	}
 
 	private void setNavigation() {
@@ -452,7 +476,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		alpha.setOnClickListener(this);
 		year = (ImageButton) view.findViewById(R.id.numsong);
 		year.setOnClickListener(this);
-		
+
 	}
 
 	private void setUpAlbumList() {
@@ -460,6 +484,104 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		albumsongsList = new ArrayList<>();
 
 		prepareAlbums();
+
+	}
+
+	private void setUpFavorites() {
+		rv3 = (RecyclerView) findViewById(R.id.rv3);
+		favoriteSongList = new ArrayList<>();
+		favoriteSongAdapter = new FavoriteSongAdapter(MainActivity.this, favoriteSongList, MainActivity.this);
+		rv3.setAdapter(favoriteSongAdapter);
+		rv3.addItemDecoration(new DividerItemDecoration(getApplicationContext(), LinearLayoutManager.VERTICAL));
+		rv3.setItemAnimator(new DefaultItemAnimator());
+		RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
+		rv3.setLayoutManager(layoutManager);
+		rv3.addOnItemTouchListener(new RecyclerItemClickListener(getApplicationContext(), new RecyclerItemClickListener.OnItemClickListener() {
+			@Override
+			public void onItemClick(View view, int position) {
+				songModel song = favoriteSongAdapter.getItem(position);
+				StorageUtil storageUtil = new StorageUtil(getApplicationContext());
+					playlist.clear();
+					for (songModel songs : favoriteSongList) {
+						song s = new song(songs.getMovietitle(), songs.getSongTitle(), songs.getUlr());
+						playlist.add(s);
+					}
+					storageUtil.storeAudio(playlist);
+					storageUtil.storeAudioIndex(position);
+					Intent setplaylist = new Intent(MainActivity.Broadcast_NEW_ALBUM);
+					sendBroadcast(setplaylist);
+					Intent broadcastIntent = new Intent(MainActivity.Broadcast_PLAY_NEW_AUDIO);
+					sendBroadcast(broadcastIntent);
+					closeDrawer();
+
+				}
+
+
+		}));
+		prepareFavorite();
+
+	}
+
+	private void prepareFavorite() {
+		FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+		favoritesMab = new HashMap<>();
+		favoriteSongList.clear();
+		DatabaseReference favref = FirebaseDatabase.getInstance().getReference().child(user.getUid()).child("Fav Songs");
+		favref.addValueEventListener(new ValueEventListener() {
+			@Override
+			public void onDataChange(DataSnapshot dataSnapshot) {
+				if (dataSnapshot.exists()) {
+					HashMap<String, Object> movies = (HashMap<String, Object>) dataSnapshot.getValue();
+
+					ArrayList<String> Favsonglist = new ArrayList<String>();
+					favoritesMab.clear();
+					if (movies != null) {
+						for (String movie : movies.keySet()) {
+
+							HashMap<String, Object> songs = (HashMap<String, Object>) movies.get(movie);
+
+							Favsonglist.clear();
+							for (String song : songs.keySet()) {
+
+								Favsonglist.add(song);
+							}
+
+							favoritesMab.put(movie, (ArrayList<String>) Favsonglist.clone());
+						}
+						prepareFavList(favoritesMab);
+					}
+				}
+			}
+
+			@Override
+			public void onCancelled(DatabaseError databaseError) {
+
+			}
+		});
+
+	}
+
+	private void prepareFavList(HashMap<String, ArrayList<String>> favoritesMab) {
+		favoriteSongList.clear();
+		if (favoritesMab != null) {
+			for (String movies : favoritesMab.keySet()) {
+
+				HashMap<String, Object> movieMap = (HashMap<String, Object>) values.get(movies);
+				ArrayList<String> favoriteSongs = favoritesMab.get(movies);
+
+				if (movieMap == null) {
+					return;
+				}
+				for (String song : favoriteSongs) {
+					HashMap<String, Object> songMap = (HashMap<String, Object>) movieMap.get(song);
+
+					songModel songModel = new songModel(movies, song, String.valueOf(songMap.get("Lyricist")), String.valueOf(songMap.get("Download")), Integer.parseInt(String.valueOf(songMap.get("Year"))));
+					favoriteSongList.add(songModel);
+				}
+			}
+		}
+
+		favoriteSongAdapter.notifyDataSetChanged();
 
 	}
 
@@ -520,8 +642,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			for (String song : songs.keySet()) {
 				if (!song.equals("IMAGE")) {
 					HashMap<String, Object> oneSong = (HashMap<String, Object>) songs.get(song);
-					Log.i(TAG, "prepareSongs: "+albums +" "+song);
-					songModel newSong = new songModel(albums, song, oneSong.get("Lyricist").toString(), String.valueOf(oneSong.get("Download")),Integer.parseInt(String.valueOf(oneSong.get("Year"))));
+					Log.i(TAG, "prepareSongs: " + albums + " " + song);
+					songModel newSong = new songModel(albums, song, oneSong.get("Lyricist").toString(), String.valueOf(oneSong.get("Download")), Integer.parseInt(String.valueOf(oneSong.get("Year"))));
 					list.add(newSong);
 					trackNos.add(song);
 				}
@@ -562,8 +684,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 	@Override
 	protected void onDestroy() {
+		NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+		notificationManager.cancel(101);
 		super.onDestroy();
 		dialog.dismiss();
+		if (serviceBound) {
+			unbindService(serviceConnection);
+			serviceBound = false;
+			//player.setCallbacks(null);
+		}
 	}
 
 	private void prepareAlbums() {
@@ -700,6 +829,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			MusicService.LocalBinder binder = (MusicService.LocalBinder) service;
 			player = binder.getService();
 			player.setMainCallbacks(MainActivity.this);
+			update();
 			serviceBound = true;
 
 		}
@@ -727,11 +857,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 	protected void onStop() {
 		super.onStop();
 		Log.i("testing", "am in stop");
-		if (serviceBound) {
-			unbindService(serviceConnection);
-			serviceBound = false;
-			//player.setCallbacks(null);
-		}
+
 	}
 
 	@Override
@@ -786,11 +912,23 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 				break;
 			}
 			case R.id.fav_pop: {
-				if (p != null) {
-					showPopup(MainActivity.this, p);
-					Log.i(TAG, "onClick: called");
-					break;
+
+				if(player != null){
+					if(player.mediaPlayer != null){
+						song s = player.getActiveSong();
+						if(checkFavoriteItem()){
+							removeFavorite(s);
+
+						}else {
+							addFavorite(s);
+
+						}
+					}
 				}
+
+
+				break;
+
 			}
 			case R.id.alphasong: {
 				if (ascending) {
@@ -803,7 +941,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 				break;
 			}
-			case R.id.numsong:{
+			case R.id.numsong: {
 				if (ascendingyear) {
 					ascendingyear = false;
 					prepareSongsYear();
@@ -829,22 +967,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 				totalTime.setText(Helper.durationCalculator(player.getDuration()));
 				playpause.setImageResource(R.drawable.pause);
 				setLyrics(player.getActiveSong());
-
+				if (checkFavoriteItem()) {
+					fav.setImageResource(R.drawable.favon);
+				} else {
+					fav.setImageResource(R.drawable.heart);
+				}
 				Log.i("CalledSet", "called set details");
 
 			} else {
+				if (player.mediaPlayer != null) {
+					seekBar.setMax(player.getDuration());
+				}
 
-				seekBar.setMax(player.getDuration());
 
 				playpause.setImageResource(android.R.drawable.ic_media_play);
 			}
-
-
-		} else {
-
-			seekBar.setProgress(player.getCurrentPosition());
-
-			Log.i("CalledSet", "called set details");
 
 
 		}
@@ -1019,7 +1156,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			for (String song : songs.keySet()) {
 				if (!song.equals("IMAGE")) {
 					HashMap<String, Object> oneSong = (HashMap<String, Object>) songs.get(song);
-					songModel newSong = new songModel(albums, song, oneSong.get("Lyricist").toString(), String.valueOf(oneSong.get("Download")),Integer.parseInt(String.valueOf(oneSong.get("Year"))));
+					songModel newSong = new songModel(albums, song, oneSong.get("Lyricist").toString(), String.valueOf(oneSong.get("Download")), Integer.parseInt(String.valueOf(oneSong.get("Year"))));
 					list.add(newSong);
 					trackNos.add(Integer.parseInt(String.valueOf(oneSong.get("Year"))));
 				}
@@ -1035,7 +1172,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			}
 
 		}
-		if(ascendingyear){
+		if (ascendingyear) {
 			for (int Track : trackNos) {
 				for (songModel songNo : list) {
 					if (songNo.getYear() == Track) {
@@ -1044,8 +1181,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 				}
 
 			}
-		}else {
-			for(int a = dummy.size()-1;a>=0;a--){
+		} else {
+			for (int a = dummy.size() - 1; a >= 0; a--) {
 				songList.add(dummy.get(a));
 			}
 		}
@@ -1056,5 +1193,66 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		songadapter.notifyDataSetChanged();
 
 	}
+
+	public boolean checkFavoriteItem() {
+		if (player != null) {
+			if (player.mediaPlayer != null) {
+				song s = player.getActiveSong();
+				Log.i(TAG, "checkFavoriteItem: " + s.getMovieName() + " " + s.getSongName());
+				Log.i(TAG, "checkFavoriteItem: " + favoritesMab);
+
+				if (s != null) {
+					if (favoritesMab.containsKey(s.getMovieName())) {
+						for (String name : favoritesMab.get(s.getMovieName())) {
+							if (name.equals(s.getSongName())) {
+								return true;
+							}
+						}
+					}
+				}
+
+			}
+		}
+
+
+		return false;
+
+	}
+
+	public void addFavorite(song s) {
+		FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+		HashMap<String, Object> map = new HashMap<>();
+		map.put(s.getSongName(), s.getSongName());
+		DatabaseReference userRef = FirebaseDatabase.getInstance().getReference();
+		userRef.child(user.getUid()).child("Fav Songs").child(s.getMovieName()).updateChildren(map).addOnCompleteListener(new OnCompleteListener<Void>() {
+			@Override
+			public void onComplete(@NonNull Task<Void> task) {
+				if(task.isSuccessful()){
+					Toast.makeText(MainActivity.this, "Successfully Added to Favorites", Toast.LENGTH_SHORT).show();
+					fav.setImageResource(R.drawable.favon);
+				}
+			}
+		});
+
+
+	}
+
+	public void removeFavorite(song s) {
+
+		FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+		DatabaseReference userRef = FirebaseDatabase.getInstance().getReference();
+		userRef.child(user.getUid()).child("Fav Songs").child(s.getMovieName()).child(s.getSongName()).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+			@Override
+			public void onComplete(@NonNull Task<Void> task) {
+				if(task.isSuccessful()){
+					Toast.makeText(MainActivity.this, "Successfully removed from Favorites", Toast.LENGTH_SHORT).show();
+					fav.setImageResource(R.drawable.heart);
+				}
+			}
+		});
+
+	}
+
 
 }

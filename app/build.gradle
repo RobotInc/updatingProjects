@@ -51,6 +51,8 @@ dependencies {
     //toggle
     implementation 'info.hoang8f:android-segmented:1.0.6'
 
+    //slidinguplayout
+    implementation 'com.sothree.slidinguppanel:library:3.3.1'
 
 }
 
