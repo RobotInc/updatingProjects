@@ -204,6 +204,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 		if (user == null) {
 			signIn();
+
 		} else {
 
 			if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
@@ -228,6 +229,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 					//TODO
 					initUI();
 				}else {
+					Toast.makeText(this, "we need premission to manage media player while receiving phone calls, please grand premission", Toast.LENGTH_SHORT).show();
 
 				}
 				break;
@@ -324,7 +326,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 						// signed in user can be handled in the listener.
 						if (task.isSuccessful()) {
 							user = mFirebaseAuth.getCurrentUser();
-							initUI();
+							int permissionCheck = ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE);
+							if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+								Toast.makeText(MainActivity.this, "Please grant \"read call state premission\" for smooth audio playback", Toast.LENGTH_LONG).show();
+								ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.READ_PHONE_STATE}, 121);
+							} else {
+								initUI();
+							}
+
 
 						}
 
