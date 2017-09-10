@@ -60,6 +60,10 @@ import com.bss.arrahmanlyrics.utils.Helper;
 import com.bss.arrahmanlyrics.utils.MusicService;
 import com.bss.arrahmanlyrics.utils.RecyclerItemClickListener;
 import com.bss.arrahmanlyrics.utils.StorageUtil;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -149,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 	public static final String Broadcast_EQTOGGLE = "com.bss.arrahmanlyrics.activites.eqToggle";
 	public static final String Broadcast_ADDTOQUEUE = "com.bss.arrahmanlyrics.activites.addToQueue";
 	public static final String Broadcast_REMOVEFROMQUERE = "com.bss.arrahmanlyrics.activites.removeFromQueue";
-
+	private AdView mAdView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

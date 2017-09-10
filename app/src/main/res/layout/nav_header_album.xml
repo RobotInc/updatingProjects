@@ -26,7 +26,8 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        >
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -40,12 +41,19 @@
             android:src="@drawable/sort_numeric"
             android:background="@android:color/transparent"
             android:layout_weight="1"/>
-        <ImageButton
+
+        <SearchView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="5" />
+        <!--<ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/search"
             android:background="@android:color/transparent"
-            android:layout_weight="1"/>
+            android:layout_weight="1"/>-->
+
+
     </LinearLayout>
 
 </LinearLayout>
