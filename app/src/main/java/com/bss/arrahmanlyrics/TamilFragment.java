@@ -81,7 +81,8 @@ public class TamilFragment extends Fragment {
 		lyrics2 = (TextView) view.findViewById(R.id.lyricsOthers2);
 		mAdView = (AdView) view.findViewById(R.id.tamil_top);
 
-		AdRequest adRequest = new AdRequest.Builder().build();
+		AdRequest adRequest = new AdRequest.Builder()
+				.build();
 		mAdView.loadAd(adRequest);
 
 		mAdView.setAdListener(new AdListener() {
@@ -120,7 +121,8 @@ public class TamilFragment extends Fragment {
 
 		mAdView1 = (AdView) view.findViewById(R.id.tamil_middle);
 
-		AdRequest adRequest1 = new AdRequest.Builder().build();
+		AdRequest adRequest1 = new AdRequest.Builder()
+				.build();
 		mAdView1.loadAd(adRequest);
 
 		mAdView1.setAdListener(new AdListener() {

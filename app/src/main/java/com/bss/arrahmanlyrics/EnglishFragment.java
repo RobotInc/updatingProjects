@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -75,7 +76,8 @@ public class EnglishFragment extends Fragment {
 
 		mAdView = (AdView) view.findViewById(R.id.english_top);
 
-		AdRequest adRequest = new AdRequest.Builder().build();
+		AdRequest adRequest = new AdRequest.Builder()
+				.build();
 		mAdView.loadAd(adRequest);
 
 		mAdView.setAdListener(new AdListener() {
@@ -114,7 +116,8 @@ public class EnglishFragment extends Fragment {
 
 		mAdView1 = (AdView) view.findViewById(R.id.eng_middle);
 
-		AdRequest adRequest1 = new AdRequest.Builder().build();
+		AdRequest adRequest1 = new AdRequest.Builder()
+				.build();
 		mAdView1.loadAd(adRequest);
 
 		mAdView1.setAdListener(new AdListener() {
