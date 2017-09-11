@@ -120,7 +120,7 @@ public class TamilFragment extends Fragment {
 
 		mAdView1 = (AdView) view.findViewById(R.id.tamil_middle);
 
-		AdRequest adRequest = new AdRequest.Builder().build();
+		AdRequest adRequest1 = new AdRequest.Builder().build();
 		mAdView1.loadAd(adRequest);
 
 		mAdView1.setAdListener(new AdListener() {
