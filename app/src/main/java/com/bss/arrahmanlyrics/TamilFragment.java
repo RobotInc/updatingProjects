@@ -4,10 +4,16 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+
 
 
 /**
@@ -18,6 +24,8 @@ import android.widget.TextView;
  * Use the {@link TamilFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
+
+
 public class TamilFragment extends Fragment {
 	// TODO: Rename parameter arguments, choose names that match
 	// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -31,6 +39,7 @@ public class TamilFragment extends Fragment {
 
 	private OnFragmentInteractionListener mListener;
 
+	private AdView mAdView;
 	public TamilFragment() {
 		// Required empty public constructor
 	}
@@ -69,6 +78,44 @@ public class TamilFragment extends Fragment {
 		View view = inflater.inflate(R.layout.fragment_other_lyrics, container, false);
 		lyrics1 = (TextView) view.findViewById(R.id.lyricsOthers);
 		lyrics2 = (TextView) view.findViewById(R.id.lyricsOthers2);
+		mAdView = (AdView) view.findViewById(R.id.tamil_top);
+		AdRequest adRequest = new AdRequest.Builder().build();
+		mAdView.loadAd(adRequest);
+
+		mAdView.setAdListener(new AdListener() {
+			@Override
+			public void onAdLoaded() {
+				// Code to be executed when an ad finishes loading.
+				Log.i("Ads", "onAdLoaded");
+			}
+
+			@Override
+			public void onAdFailedToLoad(int errorCode) {
+				// Code to be executed when an ad request fails.
+				Log.i("Ads", "onAdFailedToLoad");
+			}
+
+			@Override
+			public void onAdOpened() {
+				// Code to be executed when an ad opens an overlay that
+				// covers the screen.
+				Log.i("Ads", "onAdOpened");
+			}
+
+			@Override
+			public void onAdLeftApplication() {
+				// Code to be executed when the user has left the app.
+				Log.i("Ads", "onAdLeftApplication");
+			}
+
+			@Override
+			public void onAdClosed() {
+				// Code to be executed when when the user is about to return
+				// to the app after tapping on an ad.
+				Log.i("Ads", "onAdClosed");
+			}
+		});
+
 
 		return view;
 	}

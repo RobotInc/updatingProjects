@@ -174,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 	public static final String Broadcast_EQTOGGLE = "com.bss.arrahmanlyrics.activites.eqToggle";
 	public static final String Broadcast_ADDTOQUEUE = "com.bss.arrahmanlyrics.activites.addToQueue";
 	public static final String Broadcast_REMOVEFROMQUERE = "com.bss.arrahmanlyrics.activites.removeFromQueue";
-	private AdView mAdView;
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -266,7 +266,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 				});
 
 		builder.show();
-
+		MobileAds.initialize(this, "ca-app-pub-7987343674758455~2523296928");
 	}
 
 	@Override
