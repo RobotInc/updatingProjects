@@ -105,6 +105,12 @@
             android:src="@drawable/album"
             />
     </LinearLayout>
-
+    <ImageButton
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:id="@+id/favup"
+        android:layout_gravity="center"
+        android:src="@drawable/up"
+        android:background="@null"/>
 
 </LinearLayout>

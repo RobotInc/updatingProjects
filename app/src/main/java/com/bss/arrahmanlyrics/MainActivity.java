@@ -1,6 +1,7 @@
 package com.bss.arrahmanlyrics;
 
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -41,7 +42,9 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.FrameLayout;
@@ -50,6 +53,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -71,6 +75,7 @@ import com.bss.arrahmanlyrics.utils.StorageUtil;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -101,7 +106,7 @@ import java.util.TreeSet;
 
 import info.hoang8f.android.segmented.SegmentedGroup;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener, MusicService.mainActivityCallback, SearchView.OnQueryTextListener {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener, MusicService.mainActivityCallback, SearchView.OnQueryTextListener{
 
 	private static final String TAG = "MainActivity";
 	//firebase
@@ -125,12 +130,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 	List<albumsongs> albumsongsList;
 	List<songModel> favoriteSongList;
 	List<songModel> filteredSongList;
-	List<albumModel> filteralbumlist;
+
 
 
 	SearchView songsearch;
 	SearchView albumsearch;
-
 
 	int totalSongs = 0;
 	ArrayList<song> playlist = new ArrayList<>();
@@ -157,30 +161,22 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 	// child data in format of header title, child title
 	private HashMap<String, List<albumsongs>> _listDataChild;
-	private HashMap<String, List<albumsongs>> filterlistDataChild;
-	ImageButton alpha, year, searchsongs;
 	ImageView up;
 	FavoriteSongAdapter favoriteSongAdapter;
 	HashMap<String, ArrayList<String>> favoritesMab;
+
 	boolean ascending = true, ascendingyear = true;
 	public static final String Broadcast_PLAY_NEW_AUDIO = "com.bss.arrahmanlyrics.activites.PlayNewAudio";
 	public static final String Broadcast_NEW_ALBUM = "com.bss.arrahmanlyrics.activites.PlayNewAlbum";
-	public static final String Broadcast_PLAY = "com.bss.arrahmanlyrics.activites.Play";
-	public static final String Broadcast_PAUSE = "com.bss.arrahmanlyrics.activites.Pause";
-	public static final String Broadcast_NEXT = "com.bss.arrahmanlyrics.activites.Next";
-	public static final String Broadcast_Prev = "com.bss.arrahmanlyrics.activites.Previous";
-	public static final String Broadcast_Shuffle = "com.bss.arrahmanlyrics.activites.Shuffle";
-	public static final String Broadcast_UnShuffle = "com.bss.arrahmanlyrics.activites.UnShuffle";
-	public static final String Broadcast_EQTOGGLE = "com.bss.arrahmanlyrics.activites.eqToggle";
-	public static final String Broadcast_ADDTOQUEUE = "com.bss.arrahmanlyrics.activites.addToQueue";
-	public static final String Broadcast_REMOVEFROMQUERE = "com.bss.arrahmanlyrics.activites.removeFromQueue";
 
+	private InterstitialAd mInterstitialAd;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
 		MobileAds.initialize(this, "ca-app-pub-7987343674758455~2523296928");
+		setContentView(R.layout.activity_main);
+
 		auth = FirebaseAuth.getInstance();
 
 		int permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE);
@@ -208,6 +204,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 		} else {
 
+
 			if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
 				Toast.makeText(this, "Please grant \"read call state premission\" for smooth audio playback", Toast.LENGTH_LONG).show();
 				ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_PHONE_STATE}, 121);
@@ -216,7 +213,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			}
 
 
-			Toast.makeText(this, "signed in as "+user.getEmail(), Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "signed in as " + user.getEmail(), Toast.LENGTH_SHORT).show();
 		}
 
 
@@ -229,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 				if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
 					//TODO
 					initUI();
-				}else {
+				} else {
 					Toast.makeText(this, "we need premission to manage media player while receiving phone calls, please grand premission", Toast.LENGTH_SHORT).show();
 
 				}
@@ -239,6 +236,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 				break;
 		}
 	}
+
 	//app signin
 	private void signIn() {
 		Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
@@ -368,6 +366,43 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 	}
 
 	private void initUI() {
+		mInterstitialAd = new InterstitialAd(this);
+		mInterstitialAd.setAdUnitId("ca-app-pub-7987343674758455/6284132866");
+		mInterstitialAd.loadAd(new AdRequest.Builder().build());
+		mInterstitialAd.setAdListener(new AdListener() {
+			@Override
+			public void onAdLoaded() {
+				// Code to be executed when an ad finishes loading.
+				Log.i("Ads Interstitial", "onAdLoaded");
+			}
+
+			@Override
+			public void onAdFailedToLoad(int errorCode) {
+				// Code to be executed when an ad request fails.
+				Log.i("Ads Interstitial", "onAdFailedToLoad"+errorCode);
+			}
+
+			@Override
+			public void onAdOpened() {
+				// Code to be executed when an ad opens an overlay that
+				// covers the screen.
+				Log.i("Ads Interstitial", "onAdOpened");
+			}
+
+			@Override
+			public void onAdLeftApplication() {
+				// Code to be executed when the user has left the app.
+				Log.i("Ads Interstitial", "onAdLeftApplication");
+			}
+
+			@Override
+			public void onAdClosed() {
+				// Code to be executed when when the user is about to return
+				// to the app after tapping on an ad.
+				Log.i("Ads Interstitial", "onAdClosed");
+			}
+		});
+		up = (ImageView) findViewById(R.id.favup);
 		dialog = new ProgressDialog(this);
 
 		dialog.setMessage("Loading Database");
@@ -516,6 +551,28 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 		setNavigation();
 		favoritePanel = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
+		favoritePanel.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+			@Override
+			public void onPanelSlide(View panel, float slideOffset) {
+
+			}
+
+			@Override
+			public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+				if (favoritePanel != null &&
+						(favoritePanel.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED || favoritePanel.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED)) {
+					if (mInterstitialAd.isLoaded()) {
+						mInterstitialAd.show();
+					} else {
+						Log.d("TAG", "The interstitial wasn't loaded yet.");
+					}
+					up.setImageResource(R.drawable.down);
+				}else if (favoritePanel != null &&
+						(favoritePanel.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED)) {
+					up.setImageResource(R.drawable.up);
+				}
+			}
+		});
 		favoritePanel.setAnchorPoint(0.7f);
 
 	}
@@ -546,7 +603,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			@Override
 			public boolean onQueryTextChange(String s) {
 
-					adapter.filterData(albumList,_listDataChild,s);
+				adapter.filterData(albumList, _listDataChild, s);
 
 				return true;
 			}
@@ -636,6 +693,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 	}
 
+	@SuppressLint("ResourceType")
 	private void prepareFavList(HashMap<String, ArrayList<String>> favoritesMab) {
 		favoriteSongList.clear();
 		if (favoritesMab != null) {
@@ -657,6 +715,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		}
 
 		favoriteSongAdapter.notifyDataSetChanged();
+
 
 	}
 
@@ -752,7 +811,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			}
 
 		}
-		if (ascending) {
+
 			for (String Track : trackNos) {
 				for (songModel songNo : list) {
 					if (songNo.getSongTitle().equals(Track)) {
@@ -761,13 +820,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 				}
 
 			}
-		} else {
-			for (int a = dummy.size() - 1; a >= 0; a--) {
-				songModel song = dummy.get(a);
-				songList.add(song);
-
-			}
-		}
 
 		totalSongs = songList.size();
 		filteredSongList = songList;
@@ -1153,6 +1205,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 	}
 
 
+
 	public class SectionsPagerAdapter extends FragmentPagerAdapter {
 		private final List<Fragment> mFragmentList = new ArrayList<>();
 		private final List<String> mFragmentTitleList = new ArrayList<>();
@@ -1222,94 +1275,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		p = new Point();
 		p.x = location[0];
 		p.y = location[1];
-	}
-
-	// The method that displays the popup.
-	private void showPopup(final Activity context, Point p) {
-		int popupWidth = 200;
-		int popupHeight = 150;
-
-		// Inflate the popup_layout.xml
-		LinearLayout viewGroup = (LinearLayout) context.findViewById(R.id.layout);
-		LayoutInflater layoutInflater = (LayoutInflater) context
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View layout = layoutInflater.inflate(R.layout.fragment_other_lyrics, viewGroup);
-
-		// Creating the PopupWindow
-		final PopupWindow popup = new PopupWindow(context);
-		popup.setContentView(layout);
-		popup.setWidth(popupWidth);
-		popup.setHeight(popupHeight);
-		popup.setFocusable(true);
-
-		// Some offset to align the popup a bit to the right, and a bit down, relative to button's position.
-		int OFFSET_X = 30;
-		int OFFSET_Y = 30;
-
-		// Clear the default translucent background
-		popup.setBackgroundDrawable(new BitmapDrawable());
-
-		// Displaying the popup at the specified location, + offsets.
-		popup.showAtLocation(layout, Gravity.NO_GRAVITY, p.x + OFFSET_X, p.y + OFFSET_Y);
-
-		// Getting a reference to Close button, and close the popup when clicked.
-		Button close = (Button) layout.findViewById(R.id.close);
-		close.setOnClickListener(new View.OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				popup.dismiss();
-			}
-		});
-	}
-
-	private void prepareSongsYear() {
-		songList.clear();
-		List<songModel> list = new ArrayList<>();
-		SortedSet<Integer> trackNos = new TreeSet<>();
-
-		for (String albums : values.keySet()) {
-			HashMap<String, Object> songs = (HashMap<String, Object>) values.get(albums);
-
-			for (String song : songs.keySet()) {
-				if (!song.equals("IMAGE")) {
-					HashMap<String, Object> oneSong = (HashMap<String, Object>) songs.get(song);
-					songModel newSong = new songModel(albums, song, oneSong.get("Lyricist").toString(), String.valueOf(oneSong.get("Download")), Integer.parseInt(String.valueOf(oneSong.get("Year"))));
-					list.add(newSong);
-					trackNos.add(Integer.parseInt(String.valueOf(oneSong.get("Year"))));
-				}
-
-			}
-		}
-		ArrayList<songModel> dummy = new ArrayList<>();
-		for (int Track : trackNos) {
-			for (songModel songNo : list) {
-				if (songNo.getYear() == Track) {
-					dummy.add(songNo);
-				}
-			}
-
-		}
-		if (ascendingyear) {
-			for (int Track : trackNos) {
-				for (songModel songNo : list) {
-					if (songNo.getYear() == Track) {
-						songList.add(songNo);
-					}
-				}
-
-			}
-		} else {
-			for (int a = dummy.size() - 1; a >= 0; a--) {
-				songList.add(dummy.get(a));
-			}
-		}
-
-
-		totalSongs = songList.size();
-		filteredSongList = songList;
-		songadapter.notifyDataSetChanged();
-
 	}
 
 	public boolean checkFavoriteItem() {

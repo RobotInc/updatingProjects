@@ -36,7 +36,7 @@ public class TamilFragment extends Fragment {
 	private String mParam1;
 	private String mParam2;
 	TextView lyrics1,lyrics2;
-
+	AdView top,middle;
 	private OnFragmentInteractionListener mListener;
 
 	private AdView mAdView;

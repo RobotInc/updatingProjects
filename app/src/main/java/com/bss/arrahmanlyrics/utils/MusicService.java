@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.audiofx.Equalizer;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
 import android.os.Binder;
@@ -68,7 +69,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 
 	private static final int NOTIFICATION_ID = 101;
 	NotificationCompat.Builder notificationBuilder;
-
+	Equalizer equalizer;
 	// The volume we set the media player to when we lose audio focus, but are
 	// allowed to reduce the volume instead of stopping playback.
 	public static final float VOLUME_DUCK = 0.2f;
@@ -528,6 +529,8 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 			e.printStackTrace();
 			stopSelf();
 		}
+		equalizer = new Equalizer(0, mediaPlayer.getAudioSessionId());
+		equalizer.setEnabled(true);
 		mediaPlayer.prepareAsync();
 		maincallback.showDialog(activeSong.getSongName(), activeSong.getMovieName());
 

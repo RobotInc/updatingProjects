@@ -5,21 +5,22 @@
     android:background="@color/white"
     xmlns:ads="http://schemas.android.com/apk/res-auto"
     >
-
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/tamil_top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        ads:adSize="BANNER"
+        ads:adUnitId="ca-app-pub-7987343674758455/9997637859">
+    </com.google.android.gms.ads.AdView>
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginTop="60dp">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-        <com.google.android.gms.ads.AdView
-            android:id="@+id/tamil_top"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            ads:adSize="SMART_BANNER"
-            ads:adUnitId="ca-app-pub-7987343674758455/9997637859">
-        </com.google.android.gms.ads.AdView>
+
         <TextView
             android:id="@+id/lyricsOthers"
             android:layout_width="wrap_content"
@@ -39,7 +40,7 @@
         android:id="@+id/tamil_middle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        ads:adSize="SMART_BANNER"
+        ads:adSize="BANNER"
         ads:adUnitId="ca-app-pub-7987343674758455/6001540769">
     </com.google.android.gms.ads.AdView>
 
