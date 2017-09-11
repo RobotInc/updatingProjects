@@ -180,6 +180,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		MobileAds.initialize(this, "ca-app-pub-7987343674758455~2523296928");
 		auth = FirebaseAuth.getInstance();
 
 		int permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE);
@@ -266,7 +267,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 				});
 
 		builder.show();
-		MobileAds.initialize(this, "ca-app-pub-7987343674758455~2523296928");
+
 	}
 
 	@Override

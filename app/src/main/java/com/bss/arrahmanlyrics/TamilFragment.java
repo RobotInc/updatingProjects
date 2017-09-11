@@ -40,6 +40,7 @@ public class TamilFragment extends Fragment {
 	private OnFragmentInteractionListener mListener;
 
 	private AdView mAdView;
+	private AdView mAdView1;
 	public TamilFragment() {
 		// Required empty public constructor
 	}
@@ -79,6 +80,7 @@ public class TamilFragment extends Fragment {
 		lyrics1 = (TextView) view.findViewById(R.id.lyricsOthers);
 		lyrics2 = (TextView) view.findViewById(R.id.lyricsOthers2);
 		mAdView = (AdView) view.findViewById(R.id.tamil_top);
+
 		AdRequest adRequest = new AdRequest.Builder().build();
 		mAdView.loadAd(adRequest);
 
@@ -116,6 +118,44 @@ public class TamilFragment extends Fragment {
 			}
 		});
 
+		mAdView1 = (AdView) view.findViewById(R.id.tamil_middle);
+
+		AdRequest adRequest = new AdRequest.Builder().build();
+		mAdView1.loadAd(adRequest);
+
+		mAdView1.setAdListener(new AdListener() {
+			@Override
+			public void onAdLoaded() {
+				// Code to be executed when an ad finishes loading.
+				Log.i("Ads", "onAdLoaded");
+			}
+
+			@Override
+			public void onAdFailedToLoad(int errorCode) {
+				// Code to be executed when an ad request fails.
+				Log.i("Ads", "onAdFailedToLoad");
+			}
+
+			@Override
+			public void onAdOpened() {
+				// Code to be executed when an ad opens an overlay that
+				// covers the screen.
+				Log.i("Ads", "onAdOpened");
+			}
+
+			@Override
+			public void onAdLeftApplication() {
+				// Code to be executed when the user has left the app.
+				Log.i("Ads", "onAdLeftApplication");
+			}
+
+			@Override
+			public void onAdClosed() {
+				// Code to be executed when when the user is about to return
+				// to the app after tapping on an ad.
+				Log.i("Ads", "onAdClosed");
+			}
+		});
 
 		return view;
 	}
