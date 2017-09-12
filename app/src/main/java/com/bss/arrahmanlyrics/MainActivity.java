@@ -107,7 +107,7 @@ import java.util.TreeSet;
 
 import info.hoang8f.android.segmented.SegmentedGroup;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener, MusicService.mainActivityCallback, SearchView.OnQueryTextListener{
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener, MusicService.mainActivityCallback, SearchView.OnQueryTextListener {
 
 	private static final String TAG = "MainActivity";
 	//firebase
@@ -131,7 +131,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 	List<albumsongs> albumsongsList;
 	List<songModel> favoriteSongList;
 	List<songModel> filteredSongList;
-
 
 
 	SearchView songsearch;
@@ -181,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 		auth = FirebaseAuth.getInstance();
 
-		int permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE);
+
 
 
 		//signin initialize
@@ -207,12 +206,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		} else {
 
 
-			if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-				Toast.makeText(this, "Please grant \"read call state premission\" for smooth audio playback", Toast.LENGTH_LONG).show();
-				ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_PHONE_STATE}, 121);
-			} else {
-				initUI();
-			}
+			initUI();
 
 
 			Toast.makeText(this, "signed in as " + user.getEmail(), Toast.LENGTH_SHORT).show();
@@ -227,9 +221,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			case 121:
 				if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
 					//TODO
-					initUI();
+					Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show();
 				} else {
-					Toast.makeText(this, "we need premission to manage media player while receiving phone calls, please grand premission", Toast.LENGTH_SHORT).show();
+					Toast.makeText(this, "we need premission to manage media player while receiving phone calls, please grand premission", Toast.LENGTH_LONG).show();
 
 				}
 				break;
@@ -327,13 +321,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 						// signed in user can be handled in the listener.
 						if (task.isSuccessful()) {
 							user = mFirebaseAuth.getCurrentUser();
-							int permissionCheck = ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE);
-							if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-								Toast.makeText(MainActivity.this, "Please grant \"read call state premission\" for smooth audio playback", Toast.LENGTH_LONG).show();
-								ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.READ_PHONE_STATE}, 121);
-							} else {
-								initUI();
-							}
+							initUI();
 
 
 						}
@@ -381,7 +369,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			@Override
 			public void onAdFailedToLoad(int errorCode) {
 				// Code to be executed when an ad request fails.
-				Log.i("Ads Interstitial", "onAdFailedToLoad"+errorCode);
+				Log.i("Ads Interstitial", "onAdFailedToLoad" + errorCode);
 			}
 
 			@Override
@@ -569,13 +557,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 						Log.d("TAG", "The interstitial wasn't loaded yet.");
 					}
 					up.setImageResource(R.drawable.down);
-				}else if (favoritePanel != null &&
+				} else if (favoritePanel != null &&
 						(favoritePanel.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED)) {
 					up.setImageResource(R.drawable.up);
 				}
 			}
 		});
 		favoritePanel.setAnchorPoint(0.7f);
+		int permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE);
+		if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+			Toast.makeText(this, "Please grant \"read call state premission\" for smooth audio playback", Toast.LENGTH_LONG).show();
+			ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_PHONE_STATE}, 121);
+		}
 
 	}
 
@@ -683,8 +676,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 							favoritesMab.put(movie, (ArrayList<String>) Favsonglist.clone());
 						}
 						prepareFavList(favoritesMab);
-					}
-				}
+					}				}
 			}
 
 			@Override
@@ -814,14 +806,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 		}
 
-			for (String Track : trackNos) {
-				for (songModel songNo : list) {
-					if (songNo.getSongTitle().equals(Track)) {
-						songList.add(songNo);
-					}
+		for (String Track : trackNos) {
+			for (songModel songNo : list) {
+				if (songNo.getSongTitle().equals(Track)) {
+					songList.add(songNo);
 				}
-
 			}
+
+		}
 
 		totalSongs = songList.size();
 		filteredSongList = songList;
@@ -1131,8 +1123,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 				Log.i("CalledSet", "called set details");
 
 			} else {
+
 				if (player.mediaPlayer != null) {
 					seekBar.setMax(player.getDuration());
+					playpause.setImageResource(R.drawable.play);
 				}
 
 
@@ -1205,7 +1199,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		songadapter.setFilter(filteredSongList);
 		return true;
 	}
-
 
 
 	public class SectionsPagerAdapter extends FragmentPagerAdapter {

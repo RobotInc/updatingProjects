@@ -161,7 +161,10 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 					if(mediaPlayer != null){
 						if(mediaPlayer.isPlaying()){
 							pauseMedia();
-							lostFocusLoss = true;
+							if(maincallback != null){
+								maincallback.update();
+							}
+
 
 						}
 					}
@@ -175,6 +178,9 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 						if(lostFocusLoss){
 							resumeMedia();
 							lostFocusLoss = false;
+							if(maincallback != null){
+								maincallback.update();
+							}
 						}
 					}
 					break;
@@ -186,10 +192,27 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 						if(mediaPlayer.isPlaying()){
 							pauseMedia();
 							lostFocusLoss = true;
+							if(maincallback != null){
+								maincallback.update();
+							}
 
 						}
 					}
 					break;
+				}
+				case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT:{
+					requestAudioFocus();
+					if(mediaPlayer != null){
+						if(lostFocusLoss){
+							resumeMedia();
+							lostFocusLoss = false;
+							if(maincallback != null){
+								maincallback.update();
+							}
+						}
+					}
+					break;
+
 				}
 
 			}
@@ -455,6 +478,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 		mediaPlayer.release();
 		unregisterReceiver(setNewAlbum);
 		unregisterReceiver(playNewAudio);
+		audioManager.abandonAudioFocus(this);
 		removeNotification();
 		super.onDestroy();
 
