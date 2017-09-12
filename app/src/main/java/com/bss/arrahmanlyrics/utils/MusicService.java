@@ -123,6 +123,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 							if (mediaPlayer.isPlaying()) {
 								pauseMedia();
 								ongoingcall = true;
+
 							}
 						}
 
