@@ -78,7 +78,8 @@ dependencies {
 
     //performance monitor
     compile 'com.google.firebase:firebase-perf:11.2.2'
-
+    //about
+    implementation 'com.github.medyo:android-about-page:1.2.1'
 
 }
 

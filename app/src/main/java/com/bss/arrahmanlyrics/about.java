@@ -1,12 +1,17 @@
 package com.bss.arrahmanlyrics;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import mehdi.sakout.aboutpage.AboutPage;
+import mehdi.sakout.aboutpage.Element;
 
 
 /**
@@ -64,7 +69,53 @@ public class about extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState) {
 		// Inflate the layout for this fragment
-		return inflater.inflate(R.layout.fragment_about, container, false);
+		//View view = inflater.inflate(R.layout.fragment_about,container,false);
+		String des = "We all Know how magical AR Rahman's tunes are! And it's pleasure to sing along with the help of lyrics. So we made this musical app as a tribute to AR Rahman. Explore and feel the Music";
+		Element versionElement = new Element();
+		versionElement.setTitle("Version 2.3");
+		Element telegram = new Element();
+		telegram.setTitle("Chat with us in Telegram");
+		telegram.setValue("https://t.me/beyonity");
+		telegram.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				String url = "https://t.me/beyonity";
+				Intent i = new Intent(Intent.ACTION_VIEW);
+				i.setData(Uri.parse(url));
+				startActivity(i);
+			}
+		});
+		Element Facebook = new Element();
+		Facebook.setTitle("Like us on Facebook");
+		Facebook.setValue("https://t.me/beyonity");
+		Facebook.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				String url = "https://www.facebook.com/beyonityss";
+				Intent i = new Intent(Intent.ACTION_VIEW);
+				i.setData(Uri.parse(url));
+				startActivity(i);
+			}
+		});
+		Facebook.setIconDrawable(R.drawable.about_icon_facebook);
+		Element copyRights = new Element();
+		copyRights.setTitle("© BSS 2017");
+		telegram.setIconDrawable(R.drawable.telegram);
+
+		View aboutPage = new AboutPage(getContext())
+				.isRTL(false)
+				.setImage(R.mipmap.ic_launcher)
+				.setDescription(des)
+				.addItem(versionElement)
+				.addGroup("You can easily Reach Us by")
+				.addItem(Facebook)
+				.addItem(telegram)
+				.addItem(copyRights)
+				.create();
+
+
+
+		return aboutPage;
 	}
 
 	// TODO: Rename method, update argument and hook method into UI event

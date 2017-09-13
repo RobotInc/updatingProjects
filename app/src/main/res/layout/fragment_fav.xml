@@ -3,10 +3,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.bss.arrahmanlyrics.FavFragment">
-    <android.support.v7.widget.RecyclerView
+    <ScrollView
+        android:id="@+id/scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/rv3">
-    </android.support.v7.widget.RecyclerView>
+        >
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv3"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+
+            />
+
+    </ScrollView>
 
 </FrameLayout>
