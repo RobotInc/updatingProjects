@@ -48,6 +48,7 @@
         android:layout_alignParentBottom="true"
         android:id="@+id/moviesongname">
 
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -99,13 +100,24 @@ android:layout_weight="1"
 
 
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv3"
+    <com.bss.arrahmanlyrics.utils.CustomViewPager
+        android:id="@+id/rvg"
         android:layout_margin="10dp"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
-    </android.support.v7.widget.RecyclerView>
+    </com.bss.arrahmanlyrics.utils.CustomViewPager>
+        <android.support.design.widget.BottomNavigationView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+
+            android:id="@+id/navigation"
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="@drawable/white_grey_border_bottom"
+            app:menu="@menu/navigation" />
+
     </LinearLayout>
 
 </com.sothree.slidinguppanel.SlidingUpPanelLayout>

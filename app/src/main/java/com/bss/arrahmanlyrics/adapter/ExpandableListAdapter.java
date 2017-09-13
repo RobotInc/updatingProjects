@@ -135,24 +135,33 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
 	public void filterData(List<albumModel> models,HashMap<String,List<albumsongs>> map, String query) {
 
-		query = query.toLowerCase();
-		if(query.isEmpty()){
-			_listDataHeader = new ArrayList<>();
-			_listDataChild = new HashMap<>();
-			_listDataHeader.addAll(models);
-			_listDataChild.putAll(map);
-			notifyDataSetChanged();
-			return;
-		}
+		query = query.toLowerCase().trim();
+
 		List<albumModel> dummy = new ArrayList<>();
 		HashMap<String, List<albumsongs>> dummy2 = new HashMap<>();
 
 		for (albumModel model : models) {
+
 			String name = model.getMovietitle().toLowerCase();
-			if (name.contains(query)) {
-				dummy.add(model);
-				dummy2.put(model.getMovietitle(), map.get(model.getMovietitle()));
+			String songname = "";
+			String lyrics="";
+			String year="";
+			List<albumsongs> songs = map.get(model.getMovietitle());
+			for(albumsongs s : songs){
+				songname = s.getSongName().toLowerCase();
+				lyrics = s.getLyricistNames().toLowerCase();
+				year = s.getYear();
+				if(name.contains(query)||songname.contains(query)||lyrics.contains(query)||year.contains(query)){
+					if(!dummy2.containsKey(model.getMovietitle())){
+						dummy.add(model);
+						dummy2.put(model.getMovietitle(), map.get(model.getMovietitle()));
+					}
+
+				}
 			}
+
+
+
 		}
 		if(dummy.size()>0){
 			_listDataHeader = new ArrayList<>();
@@ -169,14 +178,13 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 		return _listDataHeader;
 	}
 
-	public void setall(List<albumModel> dummy,HashMap<String, List<albumsongs>> dummy2){
-		if(dummy.size()>0){
-			_listDataHeader.clear();
-			_listDataChild.clear();
-			_listDataHeader = dummy;
-			_listDataChild = dummy2;
-		}
+	public void setall(List<albumModel> models,HashMap<String,List<albumsongs>> map){
+		_listDataHeader = new ArrayList<>();
+		_listDataChild = new HashMap<>();
+		_listDataHeader.addAll(models);
+		_listDataChild.putAll(map);
 		notifyDataSetChanged();
+
 	}
 
 }

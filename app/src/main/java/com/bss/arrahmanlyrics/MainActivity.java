@@ -17,11 +17,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -41,7 +43,10 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -73,6 +78,7 @@ import com.bss.arrahmanlyrics.utils.Helper;
 import com.bss.arrahmanlyrics.utils.MusicService;
 import com.bss.arrahmanlyrics.utils.RecyclerItemClickListener;
 import com.bss.arrahmanlyrics.utils.StorageUtil;
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -106,8 +112,9 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import info.hoang8f.android.segmented.SegmentedGroup;
+import io.fabric.sdk.android.Fabric;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener, MusicService.mainActivityCallback, SearchView.OnQueryTextListener {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener, MusicService.mainActivityCallback, SearchView.OnQueryTextListener{
 
 	private static final String TAG = "MainActivity";
 	//firebase
@@ -117,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 	FirebaseUser user;
 	int firebaseSignRequestCode = 5;
 	DatabaseReference reference;
-	CustomViewPager viewPager;
+	CustomViewPager viewPager2;
 	ProgressDialog dialog;
 	int count;
 
@@ -132,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 	List<songModel> favoriteSongList;
 	List<songModel> filteredSongList;
 
-
+	Intent playerIntent;
 	SearchView songsearch;
 	SearchView albumsearch;
 
@@ -146,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 	ImageButton playpause, previous, next, shuffle, fav;
 	SeekBar seekBar;
 	TextView currentTime, totalTime, moviename, songname;
-
+	CustomViewPager viewPager;
 	//musicservice
 	boolean serviceBound = false;
 	MusicService player;
@@ -158,12 +165,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 	HashMap<String, Bitmap> albumcovers;
 
 	ExpandableListAdapter adapter;
-
+	BottomNavigationView bottomMenu;
 	// child data in format of header title, child title
 	private HashMap<String, List<albumsongs>> _listDataChild;
 	ImageView up;
 	FavoriteSongAdapter favoriteSongAdapter;
 	HashMap<String, ArrayList<String>> favoritesMab;
+	FavFragment favFragment;
+	about aboutFragment;
+	apps appsFragment;
 
 	boolean ascending = true, ascendingyear = true;
 	public static final String Broadcast_PLAY_NEW_AUDIO = "com.bss.arrahmanlyrics.activites.PlayNewAudio";
@@ -174,13 +184,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Fabric.with(this, new Crashlytics());
 		MobileAds.initialize(this, "ca-app-pub-7987343674758455~2523296928");
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		setContentView(R.layout.activity_main);
 
 		auth = FirebaseAuth.getInstance();
-
-
 
 
 		//signin initialize
@@ -213,6 +222,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		}
 
 
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		Log.i(TAG, "onResume: on resume called");
+		if(serviceBound){
+			if(player != null){
+				player.setMainCallbacks(MainActivity.this);
+				update();
+			}
+		}
+		Log.i(TAG, "onResume: on resume over");
 	}
 
 	@Override
@@ -526,11 +548,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			@Override
 			public void onDataChange(DataSnapshot dataSnapshot) {
 				values = (HashMap<String, Object>) dataSnapshot.getValue();
-				setImagesList();
-				setUpAlbumList();
-				setUpSongList();
-				setUpFavorites();
-				dialog.hide();
+				if(values != null) {
+					setImagesList();
+					setUpAlbumList();
+					setUpSongList();
+					setUpFavorites();
+					dialog.hide();
+				}
 			}
 
 			@Override
@@ -583,11 +607,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		//year.setOnClickListener(this);
 		songsearch = (SearchView) view.findViewById(R.id.songsearch);
 		songsearch.setOnQueryTextListener(this);
-		songsearch.setQueryHint("Search songs");
+		songsearch.setQueryHint("name,movie,year & lyricist");
+
 
 		albumsearch = (SearchView) view2.findViewById(R.id.albumsearch);
 
-		albumsearch.setQueryHint("Search Album");
+		albumsearch.setQueryHint("name,movie,year & lyricist");
 
 		albumsearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 			@Override
@@ -597,7 +622,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 			@Override
 			public boolean onQueryTextChange(String s) {
-
+				if(s.isEmpty()){
+					adapter.setall(albumList,_listDataChild);
+					return false;
+				}if(s.length()<1){
+					adapter.setall(albumList,_listDataChild);
+					return false;
+				}
 				adapter.filterData(albumList, _listDataChild, s);
 
 				return true;
@@ -615,7 +646,41 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 	}
 
 	private void setUpFavorites() {
-		rv3 = (RecyclerView) findViewById(R.id.rv3);
+
+		favFragment = new FavFragment();
+		aboutFragment = new about();
+		appsFragment = new apps();
+
+		viewPager2 = (CustomViewPager) findViewById(R.id.rvg);
+		favPageAdapter favPageAdapter = new favPageAdapter(getSupportFragmentManager());
+		favPageAdapter.addFragment(favFragment,"Favorite");
+		favPageAdapter.addFragment(aboutFragment,"About");
+		favPageAdapter.addFragment(appsFragment,"Apps");
+
+
+
+
+		viewPager2.setAdapter(favPageAdapter);
+		viewPager2.setPagingEnabled(false);
+
+		bottomMenu = (BottomNavigationView)findViewById(R.id.navigation);
+
+		bottomMenu.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+			@Override
+			public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+				if(item.getItemId() == R.id.navigation_home){
+					viewPager2.setCurrentItem(0);
+				}else if(item.getItemId() == R.id.navigation_notifications){
+					viewPager2.setCurrentItem(1);
+				}else if(item.getItemId() == R.id.navigation_dashboard){
+					viewPager2.setCurrentItem(2);
+				}
+				updateNavigationBarState(item.getItemId());
+
+				return true;
+			}
+		});
+		/*rv3 = (RecyclerView) findViewById(R.id.rv3);
 		favoriteSongList = new ArrayList<>();
 		favoriteSongAdapter = new FavoriteSongAdapter(MainActivity.this, favoriteSongList, MainActivity.this);
 		rv3.setAdapter(favoriteSongAdapter);
@@ -645,72 +710,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 
 		}));
-		prepareFavorite();
+		prepareFavorite();*/
 
 	}
+	private void updateNavigationBarState(int actionId){
+		Menu menu = bottomMenu.getMenu();
 
-	private void prepareFavorite() {
-		FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-		favoritesMab = new HashMap<>();
-		favoriteSongList.clear();
-		DatabaseReference favref = FirebaseDatabase.getInstance().getReference().child(user.getUid()).child("Fav Songs");
-		favref.addValueEventListener(new ValueEventListener() {
-			@Override
-			public void onDataChange(DataSnapshot dataSnapshot) {
-				if (dataSnapshot.exists()) {
-					HashMap<String, Object> movies = (HashMap<String, Object>) dataSnapshot.getValue();
-
-					ArrayList<String> Favsonglist = new ArrayList<String>();
-					favoritesMab.clear();
-					if (movies != null) {
-						for (String movie : movies.keySet()) {
-
-							HashMap<String, Object> songs = (HashMap<String, Object>) movies.get(movie);
-
-							Favsonglist.clear();
-							for (String song : songs.keySet()) {
-
-								Favsonglist.add(song);
-							}
-
-							favoritesMab.put(movie, (ArrayList<String>) Favsonglist.clone());
-						}
-						prepareFavList(favoritesMab);
-					}				}
-			}
-
-			@Override
-			public void onCancelled(DatabaseError databaseError) {
-
-			}
-		});
-
-	}
-
-	@SuppressLint("ResourceType")
-	private void prepareFavList(HashMap<String, ArrayList<String>> favoritesMab) {
-		favoriteSongList.clear();
-		if (favoritesMab != null) {
-			for (String movies : favoritesMab.keySet()) {
-
-				HashMap<String, Object> movieMap = (HashMap<String, Object>) values.get(movies);
-				ArrayList<String> favoriteSongs = favoritesMab.get(movies);
-
-				if (movieMap == null) {
-					return;
-				}
-				for (String song : favoriteSongs) {
-					HashMap<String, Object> songMap = (HashMap<String, Object>) movieMap.get(song);
-
-					songModel songModel = new songModel(movies, song, String.valueOf(songMap.get("Lyricist")), String.valueOf(songMap.get("Download")), Integer.parseInt(String.valueOf(songMap.get("Year"))));
-					favoriteSongList.add(songModel);
-				}
-			}
+		for (int i = 0, size = menu.size(); i < size; i++) {
+			MenuItem item = menu.getItem(i);
+			item.setChecked(item.getItemId() == actionId);
 		}
-
-		favoriteSongAdapter.notifyDataSetChanged();
-
-
 	}
 
 	private void setUpSongList() {
@@ -823,15 +832,35 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 	@Override
 	protected void onDestroy() {
-		NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-		notificationManager.cancel(101);
-		super.onDestroy();
-		dialog.dismiss();
-		if (serviceBound) {
+		Log.i(TAG, "onDestroy: on destroy called");
+		if(serviceBound){
 			unbindService(serviceConnection);
 			serviceBound = false;
-			//player.setCallbacks(null);
+			player.setMainCallbacks(null);
 		}
+
+		NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+		notificationManager.cancelAll();
+		Log.i(TAG, "onDestroy: am in destory");
+		if (dialog != null) {
+			dialog.dismiss();
+		}
+		super.onDestroy();
+
+
+	}
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event)
+	{
+
+		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0)
+		{
+
+			this.moveTaskToBack(true);
+			return true;
+		}
+
+		return super.onKeyDown(keyCode, event);
 	}
 
 	private void prepareAlbums() {
@@ -987,9 +1016,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 	@Override
 	protected void onStart() {
+		Log.i(TAG, "onStart: on start called");
 		super.onStart();
 		if (!serviceBound) {
-			Intent playerIntent = new Intent(this, MusicService.class);
+			Intent playerIntent = new Intent(MainActivity.this, MusicService.class);
 			startService(playerIntent);
 			bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
 			Log.i("bounded", "service bounded");
@@ -1002,6 +1032,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 	protected void onStop() {
 		super.onStop();
 		Log.i("testing", "am in stop");
+		if(serviceBound){
+			if(player != null){
+				player.setMainCallbacks(null);
+			}
+		}
+		Log.i("testing", "finished");
 
 	}
 
@@ -1193,12 +1229,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 	@Override
 	public boolean onQueryTextChange(String s) {
+		if(s.length()<1){
+			songadapter.setFilter(songList);
+			return false;
+		}
+		if(s.isEmpty()){
+			songadapter.setFilter(songList);
+			return false;
+		}
 		filteredSongList = new ArrayList<>();
 		filteredSongList = filterSongs(songList, s);
 
 		songadapter.setFilter(filteredSongList);
 		return true;
 	}
+
 
 
 	public class SectionsPagerAdapter extends FragmentPagerAdapter {
@@ -1230,7 +1275,35 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		}
 
 	}
+	public class favPageAdapter extends FragmentPagerAdapter {
+		private final List<Fragment> mFragmentList = new ArrayList<>();
+		private final List<String> mFragmentTitleList = new ArrayList<>();
 
+		public favPageAdapter(FragmentManager fm) {
+			super(fm);
+		}
+
+		@Override
+		public Fragment getItem(int position) {
+			return mFragmentList.get(position);
+		}
+
+		@Override
+		public int getCount() {
+			return mFragmentList.size();
+		}
+
+		public void addFragment(Fragment fragment, String title) {
+			mFragmentList.add(fragment);
+			mFragmentTitleList.add(title);
+		}
+
+		@Override
+		public CharSequence getPageTitle(int position) {
+			return mFragmentTitleList.get(position);
+		}
+
+	}
 
 	public void closeDrawer() {
 		final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -1276,19 +1349,22 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		if (player != null) {
 			if (player.mediaPlayer != null) {
 				song s = player.getActiveSong();
-				Log.i(TAG, "checkFavoriteItem: " + s.getMovieName() + " " + s.getSongName());
-				Log.i(TAG, "checkFavoriteItem: " + favoritesMab);
+				favoritesMab = favFragment.getFavoritesMab();
+				if (favoritesMab != null) {
+					Log.i(TAG, "checkFavoriteItem: " + s.getMovieName() + " " + s.getSongName());
+					Log.i(TAG, "checkFavoriteItem: " + favoritesMab);
 
-				if (s != null) {
-					if (favoritesMab.containsKey(s.getMovieName())) {
-						for (String name : favoritesMab.get(s.getMovieName())) {
-							if (name.equals(s.getSongName())) {
-								return true;
+					if (s != null) {
+						if (favoritesMab.containsKey(s.getMovieName())) {
+							for (String name : favoritesMab.get(s.getMovieName())) {
+								if (name.equals(s.getSongName())) {
+									return true;
+								}
 							}
 						}
 					}
-				}
 
+				}
 			}
 		}
 
@@ -1346,5 +1422,24 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		}
 		return filteralbumlist;
 	}
+
+	private void logUser() {
+		// TODO: Use the current user's information
+		// You can call any combination of these three methods
+		FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+		if (user != null) {
+			Crashlytics.setUserIdentifier(user.getUid());
+			Crashlytics.setUserEmail(user.getEmail());
+			Crashlytics.setUserName(user.getDisplayName());
+		}
+	}
+
+
+
+	/**
+	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
+	 * one of the sections/tabs/pages.
+	 */
+
 
 }

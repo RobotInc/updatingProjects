@@ -380,7 +380,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 		// Create a new Notification
 		notificationBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(this)
 				.setShowWhen(false)
-				.setAutoCancel(true)
+				.setAutoCancel(false)
 				.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 				.setCategory(Intent.CATEGORY_APP_MUSIC)
 				.setPriority(Notification.PRIORITY_DEFAULT)
@@ -481,6 +481,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 		unregisterReceiver(playNewAudio);
 		audioManager.abandonAudioFocus(this);
 		removeNotification();
+		stopSelf();
 		super.onDestroy();
 
 	}
@@ -557,7 +558,9 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 		equalizer = new Equalizer(0, mediaPlayer.getAudioSessionId());
 		equalizer.setEnabled(true);
 		mediaPlayer.prepareAsync();
-		maincallback.showDialog(activeSong.getSongName(), activeSong.getMovieName());
+		if(maincallback != null) {
+			maincallback.showDialog(activeSong.getSongName(), activeSong.getMovieName());
+		}
 
 	}
 

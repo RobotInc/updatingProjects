@@ -5,8 +5,10 @@ import android.content.Context;
 import android.content.res.Configuration;
 
 import com.bss.arrahmanlyrics.utils.mediaCache;
+import com.crashlytics.android.Crashlytics;
 import com.danikula.videocache.HttpProxyCacheServer;
 import com.google.firebase.database.FirebaseDatabase;
+import io.fabric.sdk.android.Fabric;
 
 /**
  * Created by mohan on 5/21/17.
@@ -19,6 +21,7 @@ public class application extends android.app.Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
         // Required initialization logic here!
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         mContext = this;
