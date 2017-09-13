@@ -306,8 +306,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 				super.onSkipToNext();
 				if (mediaPlayer == null) return;
 				skipToNext();
-				updateMetaData();
-				buildNotification(PlaybackStatus.PLAYING);
+
 
 			}
 
@@ -316,8 +315,6 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 				super.onSkipToPrevious();
 				if (mediaPlayer == null) return;
 				skipToPrevious();
-				updateMetaData();
-				buildNotification(PlaybackStatus.PLAYING);
 
 			}
 
@@ -370,8 +367,15 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 			play_pauseAction = playbackAction(0);
 		}
 
-		Bitmap largeIcon = BitmapFactory.decodeResource(getResources(),
-				R.drawable.ic_launcher); //replace with your own image
+		Bitmap Icon;
+		if(albumbitmaps.getBitmap(activeSong.getMovieName())!=null){
+			Icon = albumbitmaps.getBitmap(activeSong.getMovieName());
+		}else {
+			Icon = BitmapFactory.decodeResource(getResources(),
+					R.drawable.ic_launcher);
+
+		}
+		 //replace with your own image
 
 		Intent intent = new Intent(this, MainActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -394,7 +398,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 				// Set the Notification color
 				.setColor(getResources().getColor(R.color.colorPrimary))
 				// Set the large and small icons
-				.setLargeIcon(largeIcon)
+				.setLargeIcon(Icon)
 				.setSmallIcon(android.R.drawable.stat_sys_headset)
 				// Set Notification content information
 				.setContentIntent(pendInt)
@@ -493,12 +497,14 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 
 	@Override
 	public void onCompletion(MediaPlayer mediaPlayer) {
+
 		skipToNext();
 
 	}
 
 	@Override
 	public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
+
 		return false;
 	}
 
@@ -675,6 +681,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 
 			mediaPlayer.stop();
 
+
 		}
 	}
 
@@ -727,7 +734,11 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 		stopMedia();
 		//reset mediaPlayer
 		mediaPlayer.reset();
+
 		initMediaPlayer();
+		updateMetaData();
+		buildNotification(PlaybackStatus.PLAYING);
+
 		Log.i(TAG, "skipToPrevious: " + audioIndex);
 	}
 

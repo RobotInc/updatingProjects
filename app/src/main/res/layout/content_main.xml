@@ -10,7 +10,7 @@
     sothree:umanoPanelHeight="75dp"
     sothree:umanoShadowHeight="4dp"
     sothree:umanoParallaxOffset="100dp"
-    sothree:umanoDragView="@+id/dragView"
+    sothree:umanoDragView="@+id/media_actions"
     sothree:umanoOverlay="true"
     sothree:umanoScrollableView="@+id/list">
 <RelativeLayout

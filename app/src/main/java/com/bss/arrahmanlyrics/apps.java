@@ -2,6 +2,7 @@ package com.bss.arrahmanlyrics;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -71,21 +72,34 @@ public class apps extends Fragment {
 		View view = inflater.inflate(R.layout.fragment_apps, container, false);
 		rating = (TextView) view.findViewById(R.id.rating1);
 
-
+		install1 = (TextView) view.findViewById(R.id.install);
+		if(appInstalledOrNot("com.beyonity.matchinggame")){
+			install1.setText("Play Now");
+		}else {
+			install1.setText("Install");
+		}
 		rating.setText("5.0 \u2730");
 		top = (CardView) view.findViewById(R.id.one);
 		top.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				try {
-					Intent intent = new Intent(Intent.ACTION_VIEW);
-					intent.setData(Uri.parse("market://details?id=com.beyonity.matchinggame"));
-					startActivity(intent);
-				} catch (Exception e) { //google play app is not installed
-					Intent intent = new Intent(Intent.ACTION_VIEW);
-					intent.setData(Uri.parse("https://play.google.com/store/apps/details?id=com.beyonity.matchinggame"));
-					startActivity(intent);
+				if(appInstalledOrNot("com.beyonity.matchinggame")){
+					Intent LaunchIntent = getActivity().getPackageManager()
+							.getLaunchIntentForPackage("com.beyonity.matchinggame");
+					startActivity(LaunchIntent);
+
+				}else {
+					try {
+						Intent intent = new Intent(Intent.ACTION_VIEW);
+						intent.setData(Uri.parse("market://details?id=com.beyonity.matchinggame"));
+						startActivity(intent);
+					} catch (Exception e) { //google play app is not installed
+						Intent intent = new Intent(Intent.ACTION_VIEW);
+						intent.setData(Uri.parse("https://play.google.com/store/apps/details?id=com.beyonity.matchinggame"));
+						startActivity(intent);
+					}
 				}
+
 			}
 		});
 
@@ -119,5 +133,15 @@ public class apps extends Fragment {
 	public interface OnFragmentInteractionListener {
 		// TODO: Update argument type and name
 		void onFragmentInteraction(Uri uri);
+	}
+	private boolean appInstalledOrNot(String uri) {
+		PackageManager pm = getActivity().getPackageManager();
+		try {
+			pm.getPackageInfo(uri, PackageManager.GET_ACTIVITIES);
+			return true;
+		} catch (PackageManager.NameNotFoundException e) {
+		}
+
+		return false;
 	}
 }
