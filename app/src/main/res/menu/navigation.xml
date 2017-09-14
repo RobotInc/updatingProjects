@@ -7,7 +7,7 @@
         android:title="Favorites" />
     <item
         android:id="@+id/navigation_notifications"
-        android:icon="@android:drawable/presence_audio_busy"
+        android:icon="@android:drawable/ic_dialog_info"
         android:title="About"
         />
     <item

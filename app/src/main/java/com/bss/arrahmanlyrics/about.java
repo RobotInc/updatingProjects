@@ -70,7 +70,7 @@ public class about extends Fragment {
 	                         Bundle savedInstanceState) {
 		// Inflate the layout for this fragment
 		//View view = inflater.inflate(R.layout.fragment_about,container,false);
-		String des = "We all Know how magical AR Rahman's tunes are! And it's pleasure to sing along with the help of lyrics. So we made this musical app as a tribute to AR Rahman. Explore and feel the Music";
+		String des = "We all know how magical AR Rahman's tunes are! And it's pleasure to sing along with the help of lyrics. So we made this musical app as a tribute to AR Rahman. Explore and feel the Music";
 		Element versionElement = new Element();
 		versionElement.setTitle("Version 2.3");
 		Element telegram = new Element();

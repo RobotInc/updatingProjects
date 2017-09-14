@@ -222,7 +222,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		Log.i(TAG, "onResume: on resume over");
 	}
 
-	@Override
+	/*@Override
 	public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
 		switch (requestCode) {
 			case 121:
@@ -238,7 +238,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			default:
 				break;
 		}
-	}
+	}*/
 
 	//app signin
 	private void signIn() {
@@ -537,11 +537,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 			}
 		});
 		favoritePanel.setAnchorPoint(0.7f);
-		int permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE);
+		/*int permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE);
 		if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
 			Toast.makeText(this, "Please grant \"read call state premission\" for smooth audio playback", Toast.LENGTH_LONG).show();
 			ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_PHONE_STATE}, 121);
-		}
+		}*/
 
 	}
 
