@@ -179,11 +179,13 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 	}
 
 	public void setall(List<albumModel> models,HashMap<String,List<albumsongs>> map){
-		_listDataHeader = new ArrayList<>();
-		_listDataChild = new HashMap<>();
-		_listDataHeader.addAll(models);
-		_listDataChild.putAll(map);
-		notifyDataSetChanged();
+		if(models !=null && map != null) {
+			_listDataHeader = new ArrayList<>();
+			_listDataChild = new HashMap<>();
+			_listDataHeader.addAll(models);
+			_listDataChild.putAll(map);
+			notifyDataSetChanged();
+		}
 
 	}
 

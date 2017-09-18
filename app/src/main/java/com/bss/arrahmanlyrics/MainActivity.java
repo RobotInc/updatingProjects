@@ -571,17 +571,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 			@Override
 			public boolean onQueryTextChange(String s) {
-				if (s.isEmpty()) {
-					adapter.setall(albumList, _listDataChild);
-					return false;
+				if(albumList != null && _listDataChild !=null) {
+					if (s.isEmpty()) {
+						adapter.setall(albumList, _listDataChild);
+						return false;
+					}
+					if (s.length() < 1) {
+						adapter.setall(albumList, _listDataChild);
+						return false;
+					}
+					adapter.filterData(albumList, _listDataChild, s);
+					return true;
 				}
-				if (s.length() < 1) {
-					adapter.setall(albumList, _listDataChild);
-					return false;
-				}
-				adapter.filterData(albumList, _listDataChild, s);
-
-				return true;
+				return false;
 			}
 		});
 
@@ -883,17 +885,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 		return sorted;
 	}
 
-	@Override
-	public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-		super.onSaveInstanceState(outState, outPersistentState);
-		outState.putBoolean("serviceStatus", serviceBound);
-	}
 
-	@Override
-	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		super.onRestoreInstanceState(savedInstanceState);
-		serviceBound = savedInstanceState.getBoolean("serviceStatus");
-	}
 
 	private ServiceConnection serviceConnection = new ServiceConnection() {
 		@Override
@@ -1017,7 +1009,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 	@Override
 	public void update() {
-		if (player != null) {
+		if (player != null && player.mediaPlayer != null) {
 			if (player.isPlaying()) {
 				if (dialog.isShowing()) {
 					dialog.hide();
@@ -1105,19 +1097,22 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 	@Override
 	public boolean onQueryTextChange(String s) {
-		if (s.length() < 1) {
-			songadapter.setFilter(songList);
-			return false;
-		}
-		if (s.isEmpty()) {
-			songadapter.setFilter(songList);
-			return false;
-		}
-		filteredSongList = new ArrayList<>();
-		filteredSongList = filterSongs(songList, s);
+		if(songList != null) {
+			if (s.length() < 1) {
+				songadapter.setFilter(songList);
+				return false;
+			}
+			if (s.isEmpty()) {
+				songadapter.setFilter(songList);
+				return false;
+			}
+			filteredSongList = new ArrayList<>();
+			filteredSongList = filterSongs(songList, s);
 
-		songadapter.setFilter(filteredSongList);
-		return true;
+			songadapter.setFilter(filteredSongList);
+			return true;
+		}
+		return false;
 	}
 
 

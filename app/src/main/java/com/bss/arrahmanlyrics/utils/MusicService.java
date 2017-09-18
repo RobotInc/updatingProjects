@@ -111,6 +111,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 
 	@Override
 	public void onCreate() {
+		Log.i(TAG, "onCreate: ");
 		audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 
 
@@ -232,6 +233,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		Log.i(TAG, "onStartCommand: ");
 		//getting systems default ringtone
 		if (requestAudioFocus() == false) {
 			//Could not gain focus
@@ -468,7 +470,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 
 	@Override
 	public void onDestroy() {
-
+		Log.i(TAG, "onDestroy: ");
 		//stopping the player when service is destroyed
 		if (mediaPlayer != null) {
 			new StorageUtil(getApplicationContext()).storeResumePosition(mediaPlayer.getCurrentPosition());
@@ -480,7 +482,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 			TelephonyManager telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 			telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
 		}
-		mediaPlayer.release();
+
 		unregisterReceiver(setNewAlbum);
 		unregisterReceiver(playNewAudio);
 		audioManager.abandonAudioFocus(this);
@@ -492,24 +494,28 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 
 	@Override
 	public void onBufferingUpdate(MediaPlayer mediaPlayer, int i) {
-
+		//Log.i(TAG, "onBufferingUpdate: ");
 	}
 
 	@Override
 	public void onCompletion(MediaPlayer mediaPlayer) {
-
+		Log.i(TAG, "onCompletion: ");
 		skipToNext();
 
 	}
 
 	@Override
 	public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
-
-		return false;
+		Log.i(TAG, "onError: "+i +" "+i1);
+		if(maincallback != null && activeSong != null) {
+			maincallback.showDialog(activeSong.getSongName(), activeSong.getMovieName());
+		}
+		return true;
 	}
 
 	@Override
 	public void onPrepared(MediaPlayer mediaPlayer) {
+		Log.i(TAG, "onPrepared: ");
 		playMedia();
 		if (maincallback != null) {
 			maincallback.update();
@@ -529,7 +535,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 
 	@Override
 	public void onAudioFocusChange(int i) {
-
+		Log.i(TAG, "onAudioFocusChange: ");
 	}
 
 	public class LocalBinder extends Binder {
