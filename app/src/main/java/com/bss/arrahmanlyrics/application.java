@@ -56,6 +56,7 @@ public class application extends android.app.Application {
 
     private HttpProxyCacheServer newProxy() {
         return new HttpProxyCacheServer.Builder(this)
+                .maxCacheFilesCount(50)
                 .cacheDirectory(mediaCache.getVideoCacheDir(this))
                 .build();
     }
