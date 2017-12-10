@@ -562,7 +562,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 		try {
 			// Set the data source to the mediaFile location
 			mediaPlayer.setDataSource(setProxyUrl(activeSong.getUrl()));
-
+			Log.i(TAG, "initMediaPlayer: " + activeSong.getUrl());
 		} catch (IOException e) {
 			e.printStackTrace();
 			stopSelf();

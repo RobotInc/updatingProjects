@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="80dp"
@@ -96,6 +97,7 @@
             android:background="@android:color/transparent"
             android:src="@drawable/heart" />
 
+
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -105,12 +107,13 @@
             android:src="@drawable/album"
             />
     </LinearLayout>
+
     <ImageButton
-        android:layout_width="32dp"
-        android:layout_height="32dp"
         android:id="@+id/favup"
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
         android:layout_gravity="center"
-        android:src="@drawable/up"
-        android:background="@null"/>
+        android:background="@null"
+        android:src="@drawable/up" />
 
 </LinearLayout>
