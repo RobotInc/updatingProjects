@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:divider="@null"
             android:orientation="horizontal"
-            app:Layout="true"
+
             app:layoutManager="android.support.v7.widget.LinearLayoutManager" />
     </ScrollView>
 

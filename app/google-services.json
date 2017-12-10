@@ -15,6 +15,38 @@
       },
       "oauth_client": [
         {
+          "client_id": "1078531366146-egkgh21jg34epi5okfd8kn9bd2i851uv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bss.arrahmanlyrics",
+            "certificate_hash": "10f1ae880f3267dbe1146fb05f9b0eaa3b714bea"
+          }
+        },
+        {
+          "client_id": "1078531366146-hqpgmsuds05mmlu8t8j6usb8u65fj3vv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bss.arrahmanlyrics",
+            "certificate_hash": "dfc35b991fee7f0eb7521e1a885d92ed461a617e"
+          }
+        },
+        {
+          "client_id": "1078531366146-74r59ibecbibqbrpqc6hm7apcmg07ovn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bss.arrahmanlyrics",
+            "certificate_hash": "78e78640994af4f737b5bb9a18ba53d67c4436f3"
+          }
+        },
+        {
+          "client_id": "1078531366146-r4km9ge1jtml5jfh4c258m7qjkn4l9db.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bss.arrahmanlyrics",
+            "certificate_hash": "2883f4ba40aa4bcc4f5948f20478a02860fa8cf2"
+          }
+        },
+        {
           "client_id": "1078531366146-h5aifk9vd9el6a3d79pd75hdvvk50pp6.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
